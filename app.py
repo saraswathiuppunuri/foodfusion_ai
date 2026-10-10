@@ -1,5 +1,8 @@
 import os
+import sys
 import datetime
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from config import Config
@@ -353,7 +356,7 @@ def place_order():
 
 if __name__ == '__main__':
     print("=====================================================================")
-    print(" 🚀 Online Food Ordering System — Powered by AI")
-    print(" Server starting on http://127.0.0.1:5000")
+    print(" >> Online Food Ordering System - Powered by AI")
+    print(" >> Server starting on http://127.0.0.1:5000")
     print("=====================================================================")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
