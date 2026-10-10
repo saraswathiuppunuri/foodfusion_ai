@@ -4,11 +4,13 @@
 
 // Global state
 let cart = JSON.parse(localStorage.getItem('foodai_cart') || '[]');
+let currentDiscount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     initSidebar();
     updateCartUI();
     initNLPrompt();
+    initAuthUser();
 });
 
 // Sidebar Mobile Toggle
@@ -160,53 +162,7 @@ function fetchOrderPrediction(itemCount) {
 }
 
 function handleCheckout() {
-    if (cart.length === 0) return;
-
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (checkoutBtn) {
-        checkoutBtn.disabled = true;
-        checkoutBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Optimizing Dispatch...`;
-    }
-
-    fetch('/api/place-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            items: cart,
-            customer_name: "Aman Gupta",
-            address: "102 Indiranagar 100ft Rd, Bengaluru",
-            order_type: "ai_smart_cart"
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            cart = [];
-            saveCart();
-            const cartOffcanvasEl = document.getElementById('cartOffcanvas');
-            const bsOffcanvas = bootstrap.Offcanvas.getInstance(cartOffcanvasEl);
-            if (bsOffcanvas) bsOffcanvas.hide();
-
-            showToast(`🎉 Order Placed Successfully! Order #${data.order.id}. ETA: ${data.order.total_eta_min} mins.`, "success");
-            
-            // Redirect to map to track delivery live after 1.2s
-            setTimeout(() => {
-                window.location.href = '/map';
-            }, 1200);
-        } else {
-            showToast("Failed to place order: " + data.message, "danger");
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        showToast("Error communicating with server", "danger");
-    })
-    .finally(() => {
-        if (checkoutBtn) {
-            checkoutBtn.disabled = false;
-            checkoutBtn.innerHTML = `<i class="fa-solid fa-lock me-2"></i>Place AI Order`;
-        }
-    });
+    openCheckoutModal();
 }
 
 // -------------------------------------------------------------------
@@ -368,4 +324,331 @@ function showToast(message, type = "info") {
     const bsToast = new bootstrap.Toast(toastEl, { delay: 4000 });
     bsToast.show();
     toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+}
+
+// -------------------------------------------------------------------
+// ZOMATO-STYLE CHECKOUT, ADDRESS & ORDER PLACEMENT
+// -------------------------------------------------------------------
+function openCheckoutModal() {
+    if (!cart || cart.length === 0) {
+        showToast("Your cart is empty! Add delicious meals to order.", "warning");
+        return;
+    }
+
+    const subtotal = cart.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+    const itemTotalEl = document.getElementById('modalItemTotal');
+    if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+
+    // Recompute coupon if one was active
+    recalculateCheckoutBill();
+
+    // Close offcanvas cart drawer
+    const cartOffcanvasEl = document.getElementById('cartOffcanvas');
+    if (cartOffcanvasEl) {
+        const bsOffcanvas = bootstrap.Offcanvas.getInstance(cartOffcanvasEl);
+        if (bsOffcanvas) bsOffcanvas.hide();
+    }
+
+    // Open checkout modal
+    const checkoutModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('checkoutModal'));
+    checkoutModal.show();
+}
+
+function recalculateCheckoutBill() {
+    const subtotal = cart.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+    const taxes = 15.0;
+    const discountRow = document.getElementById('modalDiscountRow');
+    const discountAmountEl = document.getElementById('modalDiscountAmount');
+    const grandTotalEl = document.getElementById('modalGrandTotal');
+
+    if (currentDiscount > 0) {
+        if (discountRow) discountRow.classList.remove('d-none');
+        if (discountAmountEl) discountAmountEl.textContent = `-₹${currentDiscount.toFixed(2)}`;
+    } else {
+        if (discountRow) discountRow.classList.add('d-none');
+    }
+
+    const grandTotal = Math.max(0, subtotal + taxes - currentDiscount);
+    if (grandTotalEl) grandTotalEl.textContent = `₹${grandTotal.toFixed(2)}`;
+}
+
+function toggleInstruction(btn, text) {
+    btn.classList.toggle('active');
+}
+
+function setAndApplyCoupon(code) {
+    const input = document.getElementById('couponCodeInput');
+    if (input) input.value = code;
+    applyCouponCode();
+}
+
+function applyCouponCode() {
+    const input = document.getElementById('couponCodeInput');
+    const statusMsg = document.getElementById('couponStatusMessage');
+    const code = (input ? input.value : '').trim().toUpperCase();
+    const subtotal = cart.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+
+    if (!code) {
+        showToast("Please enter a coupon code", "warning");
+        return;
+    }
+
+    if (code === 'SAVE50') {
+        if (subtotal < 100) {
+            showToast("SAVE50 requires a minimum order of ₹100", "warning");
+            return;
+        }
+        currentDiscount = 50.0;
+    } else if (code === 'WELCOME20') {
+        currentDiscount = Math.round(subtotal * 0.20);
+    } else if (code === 'ECOSAVE') {
+        currentDiscount = Math.round(subtotal * 0.15);
+    } else {
+        showToast(`Coupon '${code}' is invalid or expired`, "danger");
+        return;
+    }
+
+    recalculateCheckoutBill();
+
+    if (statusMsg) {
+        statusMsg.classList.remove('d-none');
+        statusMsg.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Coupon <strong>${code}</strong> applied! ₹${currentDiscount.toFixed(2)} saved.`;
+    }
+
+    showToast(`🎉 Coupon ${code} applied! Saved ₹${currentDiscount.toFixed(2)}`, "success");
+}
+
+function submitZomatoOrder() {
+    if (!cart || cart.length === 0) {
+        showToast("Your cart is empty!", "warning");
+        return;
+    }
+
+    const nameInput = document.getElementById('checkoutName');
+    const phoneInput = document.getElementById('checkoutPhone');
+    const flatInput = document.getElementById('checkoutFlat');
+    const areaInput = document.getElementById('checkoutArea');
+    const addrType = document.querySelector('input[name="addrType"]:checked')?.value || 'Home';
+    const paymentOption = document.querySelector('input[name="paymentOption"]:checked')?.value || 'upi';
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const flat = flatInput ? flatInput.value.trim() : '';
+    const area = areaInput ? areaInput.value.trim() : '';
+
+    if (!name || !phone || !flat || !area) {
+        showToast("Please fill in Name, Phone, and Address fields!", "danger");
+        return;
+    }
+
+    // Collect active delivery instructions
+    const activeInstructions = Array.from(document.querySelectorAll('.instruction-pill.active'))
+        .map(b => b.innerText.trim())
+        .join(', ');
+
+    const fullAddress = `[${addrType}] ${flat}, ${area}`;
+
+    const confirmBtn = document.getElementById('confirmOrderBtn');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Placing Order...`;
+    }
+
+    fetch('/api/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            items: cart,
+            customer_name: name,
+            customer_phone: phone,
+            address: fullAddress,
+            delivery_instructions: activeInstructions,
+            order_type: 'zomato_checkout',
+            discount_amount: currentDiscount
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const order = data.order || {};
+            const orderIdEl = document.getElementById('successOrderId');
+            const etaEl = document.getElementById('successOrderEta');
+            const addrEl = document.getElementById('successOrderAddress');
+
+            if (orderIdEl) orderIdEl.textContent = '#' + (order.id || Math.floor(100 + Math.random() * 900));
+            if (etaEl) etaEl.textContent = `~${order.total_eta_min || 25} mins`;
+            if (addrEl) addrEl.textContent = fullAddress;
+
+            // Clear cart
+            cart = [];
+            saveCart();
+            currentDiscount = 0;
+
+            // Hide checkout modal
+            const checkoutModalEl = document.getElementById('checkoutModal');
+            if (checkoutModalEl) {
+                const bsCheckout = bootstrap.Modal.getInstance(checkoutModalEl);
+                if (bsCheckout) bsCheckout.hide();
+            }
+
+            // Open Order Success Modal
+            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('orderSuccessModal'));
+            successModal.show();
+            showToast("🎉 Order placed successfully! Kitchen has started preparing.", "success");
+        } else {
+            showToast("Failed to place order: " + (data.message || 'Error occurred'), "danger");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Network error while placing order", "danger");
+    })
+    .finally(() => {
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = `<i class="fa-solid fa-lock me-2"></i>Pay & Place Order`;
+        }
+    });
+}
+
+function resetCartUI() {
+    const successModalEl = document.getElementById('orderSuccessModal');
+    if (successModalEl) {
+        const bsModal = bootstrap.Modal.getInstance(successModalEl);
+        if (bsModal) bsModal.hide();
+    }
+    updateCartUI();
+}
+
+// -------------------------------------------------------------------
+// USER AUTHENTICATION & QUICK DEMO ROLES (ZOMATO STYLE)
+// -------------------------------------------------------------------
+function initAuthUser() {
+    const savedUser = localStorage.getItem('foodfusion_user');
+    if (savedUser) {
+        try {
+            const user = JSON.parse(savedUser);
+            renderUserNav(user);
+            populateCheckoutUser(user);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+
+function renderUserNav(user) {
+    const container = document.getElementById('authNavContainer');
+    if (!container) return;
+
+    const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+
+    container.innerHTML = `
+        <div class="dropdown">
+            <button class="btn btn-sm btn-light border rounded-pill d-flex align-items-center gap-2 px-2 py-1" data-bs-toggle="dropdown">
+                <span class="user-avatar" style="width: 26px; height: 26px; font-size: 0.72rem; background: #e23744;">${initials}</span>
+                <span class="fw-bold small text-dark d-none d-sm-inline">${user.name}</span>
+                <i class="fa-solid fa-chevron-down text-muted" style="font-size: 10px;"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2">
+                <li class="px-3 py-2 border-bottom mb-1">
+                    <div class="fw-bold small text-dark">${user.name}</div>
+                    <small class="text-muted text-capitalize">${user.role || 'Customer'} • ${user.phone || ''}</small>
+                </li>
+                <li><a class="dropdown-item rounded-2 py-2 small" href="#checkoutModal" onclick="openCheckoutModal()"><i class="fa-solid fa-bag-shopping me-2 text-danger"></i>My Cart & Checkout</a></li>
+                <li><a class="dropdown-item rounded-2 py-2 small" href="/analytics"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Orders & Analytics</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item rounded-2 py-2 small text-danger" onclick="logoutUser()"><i class="fa-solid fa-right-from-bracket me-2"></i>Log out</button></li>
+            </ul>
+        </div>
+    `;
+}
+
+function populateCheckoutUser(user) {
+    const nameInput = document.getElementById('checkoutName');
+    const phoneInput = document.getElementById('checkoutPhone');
+    const flatInput = document.getElementById('checkoutFlat');
+    const areaInput = document.getElementById('checkoutArea');
+
+    if (nameInput && user.name) nameInput.value = user.name;
+    if (phoneInput && user.phone) phoneInput.value = user.phone;
+    if (user.address) {
+        if (flatInput) flatInput.value = user.address.split(',')[0] || user.address;
+        if (areaInput) areaInput.value = user.address.split(',').slice(1).join(',').trim() || 'Indiranagar, Bengaluru';
+    }
+}
+
+function quickLoginRole(role, name, phone, address) {
+    const user = { role, name, phone, address };
+    localStorage.setItem('foodfusion_user', JSON.stringify(user));
+    renderUserNav(user);
+    populateCheckoutUser(user);
+
+    const loginModalEl = document.getElementById('loginModal');
+    if (loginModalEl) {
+        const bsModal = bootstrap.Modal.getInstance(loginModalEl);
+        if (bsModal) bsModal.hide();
+    }
+
+    showToast(`Logged in as ${name} (${role.toUpperCase()})`, "success");
+}
+
+function handlePhoneLogin() {
+    const phoneInput = document.getElementById('loginPhoneInput');
+    const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+
+    if (!rawPhone || rawPhone.length < 10) {
+        showToast("Please enter a valid 10-digit mobile number", "warning");
+        return;
+    }
+
+    const phone = '+91 ' + rawPhone.replace(/\\D/g, '').slice(-10);
+    const user = {
+        role: 'customer',
+        name: 'Aman Gupta',
+        phone: phone,
+        address: 'Flat 402, Green Glen Towers, Indiranagar'
+    };
+
+    localStorage.setItem('foodfusion_user', JSON.stringify(user));
+    renderUserNav(user);
+    populateCheckoutUser(user);
+
+    const loginModalEl = document.getElementById('loginModal');
+    if (loginModalEl) {
+        const bsModal = bootstrap.Modal.getInstance(loginModalEl);
+        if (bsModal) bsModal.hide();
+    }
+
+    showToast(`Welcome! Logged in with ${phone}`, "success");
+}
+
+function logoutUser() {
+    localStorage.removeItem('foodfusion_user');
+    const container = document.getElementById('authNavContainer');
+    if (container) {
+        container.innerHTML = `
+            <button class="btn btn-outline-danger btn-sm fw-bold px-3 py-1 rounded-pill" data-bs-toggle="modal" data-bs-target="#loginModal" id="loginNavBtn">
+                <i class="fa-solid fa-user me-1"></i>Log in
+            </button>
+        `;
+    }
+    showToast("Logged out successfully", "info");
+}
+
+function selectQuickLocation(areaName, flatDetail) {
+    const navAddr = document.getElementById('navAddressDisplay');
+    const areaInput = document.getElementById('checkoutArea');
+    const flatInput = document.getElementById('checkoutFlat');
+
+    if (navAddr) navAddr.textContent = areaName;
+    if (areaInput) areaInput.value = areaName + ', Bengaluru';
+    if (flatInput && flatDetail) flatInput.value = flatDetail;
+
+    const modalEl = document.getElementById('addressPickerModal');
+    if (modalEl) {
+        const bsModal = bootstrap.Modal.getInstance(modalEl);
+        if (bsModal) bsModal.hide();
+    }
+
+    showToast(`Delivery location set to ${areaName}`, "success");
 }

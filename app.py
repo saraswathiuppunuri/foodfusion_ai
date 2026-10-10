@@ -318,15 +318,25 @@ def process_fridge_vision():
 def place_order():
     data = request.get_json() or {}
     items = data.get('items', [])
-    customer_name = data.get('customer_name', 'Rahul Sharma')
-    address = data.get('address', '102 Indiranagar, Bengaluru')
+    customer_name = data.get('customer_name', 'Rahul Sharma').strip()
+    customer_phone = data.get('customer_phone', '+91 98765 43210').strip()
+    address = data.get('address', '102 Indiranagar, Bengaluru').strip()
+    delivery_instructions = data.get('delivery_instructions', '').strip()
     order_type = data.get('order_type', 'regular')
+    discount_amount = float(data.get('discount_amount', 0.0))
 
     if not items:
         return jsonify({"status": "error", "message": "Cart is empty"}), 400
 
-    total_amount = sum(float(it.get('price', 0)) * int(it.get('quantity', 1)) for it in items)
-    
+    item_subtotal = sum(float(it.get('price', 0)) * int(it.get('quantity', 1)) for it in items)
+    tax_gst = 15.0
+    delivery_fee = 0.0 # Free eco delivery
+    final_total = max(0.0, item_subtotal + tax_gst + delivery_fee - discount_amount)
+
+    full_address = address
+    if delivery_instructions:
+        full_address = f"{address} • Note: {delivery_instructions}"
+
     # Predict timing
     prediction = predict_order_timings(item_count=len(items), distance_km=3.2)
 
@@ -334,8 +344,9 @@ def place_order():
     try:
         new_order = Order(
             customer_name=customer_name,
-            delivery_address=address,
-            total_amount=round(total_amount, 2),
+            customer_phone=customer_phone,
+            delivery_address=full_address,
+            total_amount=round(final_total, 2),
             order_type=order_type,
             status="preparing",
             predicted_prep_min=prediction["predicted_prep_min"],
@@ -362,7 +373,7 @@ def place_order():
 
     return jsonify({
         "status": "success",
-        "message": "Order placed successfully! Live delivery tracking active.",
+        "message": f"Order #{new_order.id} placed successfully!",
         "order": order_dict
     })
 

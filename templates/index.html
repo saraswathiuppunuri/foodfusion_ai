@@ -6,41 +6,41 @@
 <div class="container-fluid px-0">
 
     <!-- ============================================================ -->
-    <!-- FEATURE 1: AI NATURAL-LANGUAGE ORDERING HERO -->
+    <!-- AI NATURAL-LANGUAGE ORDERING HERO -->
     <!-- ============================================================ -->
     <section class="nl-hero-card mb-4">
         <div class="row align-items-center">
             <div class="col-lg-12">
-                <span class="badge bg-white text-primary fw-bold mb-2 px-3 py-1 text-uppercase tracking-wider">
-                    <i class="fa-solid fa-sparkles me-1"></i> Feature 1: AI Natural-Language Ordering
+                <span class="badge bg-white text-danger fw-bold mb-2 px-3 py-1 shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles me-1 text-danger"></i> AI Smart Ordering
                 </span>
-                <h2 class="fw-extrabold text-white mb-2">Speak or Type What You Crave. AI Builds Your Cart.</h2>
-                <p class="text-indigo-200 mb-4" style="color: #c7d2fe; max-width: 780px;">
-                    Our constraint-satisfaction AI parses budgets, headcount, dietaries, and spice preferences simultaneously to build an optimized, explainable cart in milliseconds.
+                <h2 class="fw-extrabold text-white mb-2">What are you craving today?</h2>
+                <p class="text-indigo-100 mb-4" style="color: #e0e7ff; max-width: 680px; font-size: 0.95rem;">
+                    Tell AI what you want — budget, headcount, or diet. We'll instantly curate the best meals and build your cart.
                 </p>
 
                 <!-- Prompt Input Bar -->
                 <div class="nl-prompt-container">
-                    <i class="fa-solid fa-robot text-primary ms-3 fa-lg"></i>
+                    <i class="fa-solid fa-wand-magic-sparkles text-danger ms-3 fa-lg"></i>
                     <input type="text" id="nlPromptInput" class="nl-prompt-input" 
-                           placeholder="Type: 'I need dinner for three people under ₹500, two vegetarian meals and one spicy meal.'"
+                           placeholder="e.g. Dinner for 3 under ₹500, two veg meals and one spicy"
                            value="I need dinner for three people under ₹500, two vegetarian meals and one spicy meal.">
                     <button class="btn btn-ai-generate" id="nlSubmitBtn">
-                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Build Smart Cart
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Build Cart
                     </button>
                 </div>
 
                 <!-- One-click prompt chips -->
                 <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
-                    <span class="small text-white-50 fw-semibold"><i class="fa-solid fa-lightbulb me-1"></i>Try Prompts:</span>
-                    <button class="preset-chip" onclick="setPresetPrompt('I need dinner for three people under ₹500, two vegetarian meals and one spicy meal.')">
-                        “Dinner for 3 under ₹500, 2 veg, 1 spicy”
+                    <span class="small text-white-50 fw-semibold"><i class="fa-solid fa-bolt me-1"></i>Quick Picks:</span>
+                    <button class="preset-chip" onclick="setPresetPrompt('Dinner for three people under ₹500, two vegetarian meals and one spicy meal')">
+                        “Dinner for 3 under ₹500”
                     </button>
-                    <button class="preset-chip" onclick="setPresetPrompt('High protein lunch under ₹200 with chicken or soya')">
+                    <button class="preset-chip" onclick="setPresetPrompt('High protein healthy lunch under ₹200')">
                         “High protein lunch under ₹200”
                     </button>
-                    <button class="preset-chip" onclick="setPresetPrompt('Quick light dinner for 2 people under ₹300 pure vegetarian')">
-                        “Light dinner for 2 under ₹300 veg”
+                    <button class="preset-chip" onclick="setPresetPrompt('Quick light dinner for 2 people under ₹300 pure veg')">
+                        “Light veg dinner under ₹300”
                     </button>
                 </div>
             </div>
@@ -51,19 +51,16 @@
     <div id="nlResultSection"></div>
 
     <!-- ============================================================ -->
-    <!-- FEATURE 2: SMART SURPLUS FOOD MARKETPLACE (ZERO-WASTE) -->
+    <!-- SMART SURPLUS FOOD MARKETPLACE (ZERO-WASTE) -->
     <!-- ============================================================ -->
     <section class="mb-5">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
             <div>
-                <div class="d-flex align-items-center gap-2">
-                    <h3 class="fw-bold mb-0">🌱 Smart Surplus Food Marketplace</h3>
-                    <span class="badge bg-success-subtle text-success fw-bold px-3 py-1">Feature 2 • Zero Waste</span>
-                </div>
-                <p class="text-muted small mb-0">Fresh, surplus meals discounted up to 60%. Save money while preventing food waste.</p>
+                <h3 class="fw-bold mb-0">🌱 Save Food, Save Money</h3>
+                <p class="text-muted small mb-0">Fresh restaurant meals at up to 60% OFF. Delicious food rescued daily.</p>
             </div>
             <a href="{{ url_for('surplus_marketplace') }}" class="btn btn-outline-success btn-sm fw-bold px-3">
-                View All Deals & Impact <i class="fa-solid fa-arrow-right ms-1"></i>
+                View All Deals <i class="fa-solid fa-arrow-right ms-1"></i>
             </a>
         </div>
 
@@ -105,21 +102,21 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- UNIQUE TWIST BANNER: FRIDGE-TO-PLATE VISION AI -->
+    <!-- FRIDGE-TO-PLATE VISION AI -->
     <!-- ============================================================ -->
     <section class="card border-0 rounded-4 shadow-sm p-4 mb-5" style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-left: 6px solid #f97316 !important;">
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <span class="badge bg-warning text-dark fw-bold mb-2">
-                    <i class="fa-solid fa-camera me-1"></i> Unique Innovation Twist: Computer Vision
+                    <i class="fa-solid fa-camera me-1"></i> AI Fridge Scanner
                 </span>
-                <h3 class="fw-bold text-dark mb-2">Snap Your Fridge: Cook at Home vs. Order Delivery!</h3>
+                <h3 class="fw-bold text-dark mb-2">Cook at Home vs. Order Delivery</h3>
                 <p class="text-secondary mb-3">
-                    Upload a photo of your fridge ingredients. Our Computer Vision AI detects what you have, matches gourmet restaurant equivalents, and gives you a <strong>side-by-side cost, effort, and time breakdown</strong> to help you decide whether to cook or order.
+                    Snap a photo of your fridge ingredients. Compare cooking time and effort with doorstep delivery.
                 </p>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ url_for('fridge_vision') }}" class="btn btn-warning fw-bold px-4 text-dark shadow-sm">
-                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Launch Fridge Vision Scanner
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Launch Fridge Scanner
                     </a>
                 </div>
             </div>
@@ -142,19 +139,16 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- FEATURE 4: EXPLAINABLE FOOD RECOMMENDATIONS (SCIKIT-LEARN) -->
+    <!-- EXPLAINABLE FOOD RECOMMENDATIONS -->
     <!-- ============================================================ -->
     <section class="mb-5">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
             <div>
-                <div class="d-flex align-items-center gap-2">
-                    <h3 class="fw-bold mb-0">🎯 For You: Explainable Recommendations</h3>
-                    <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1">Feature 4 • Scikit-Learn TF-IDF</span>
-                </div>
-                <p class="text-muted small mb-0">Personalized matching with full AI transparency explaining why every meal was selected.</p>
+                <h3 class="fw-bold mb-0">🎯 Recommended For You</h3>
+                <p class="text-muted small mb-0">Dishes curated to match your taste and nutritional preferences.</p>
             </div>
             <button class="btn btn-outline-primary btn-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#prefModal">
-                <i class="fa-solid fa-sliders me-1"></i>Tune AI Taste Profile
+                <i class="fa-solid fa-sliders me-1"></i>Taste Preferences
             </button>
         </div>
 
@@ -174,7 +168,7 @@
                         <!-- Explainability Box -->
                         <div class="explainable-badge-box">
                             <i class="fa-solid fa-brain me-1"></i>
-                            <strong>Why AI selected:</strong> Matches your high-protein North Indian preferences & stays comfortably under target budget.
+                            <strong>Why this pick:</strong> Matches your high-protein North Indian preferences & budget.
                         </div>
 
                         <h5 class="dish-title">{{ dish.name }}</h5>
@@ -205,8 +199,8 @@
     <section class="mb-5">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
             <div>
-                <h3 class="fw-bold mb-0">🍽️ Explore Full Menu Catalog</h3>
-                <p class="text-muted small mb-0">From top-rated local kitchens in Bengaluru</p>
+                <h3 class="fw-bold mb-0">🍽️ Explore Popular Dishes</h3>
+                <p class="text-muted small mb-0">Freshly prepared meals from top Bengaluru kitchens</p>
             </div>
             <!-- Filter Pills -->
             <div class="btn-group btn-group-sm" role="group">

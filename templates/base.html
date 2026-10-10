@@ -50,13 +50,13 @@
 
             <!-- Navigation Links -->
             <nav class="sidebar-nav">
-                <div class="nav-section-label">CORE AI PLATFORM</div>
+                <div class="nav-section-label">EXPLORE & ORDER</div>
                 <ul class="nav flex-column sidebar-menu">
                     <li class="nav-item">
                         <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
                             <i class="fa-solid fa-wand-magic-sparkles nav-icon"></i>
-                            <span class="nav-label">AI Natural Ordering</span>
-                            <span class="badge bg-primary-subtle text-primary ms-auto">F-1</span>
+                            <span class="nav-label">AI Smart Ordering</span>
+                            <span class="badge bg-primary-subtle text-primary ms-auto">AI</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -70,28 +70,28 @@
                         <a href="{{ url_for('group_order') }}" class="nav-link {% if request.endpoint == 'group_order' %}active{% endif %}">
                             <i class="fa-solid fa-users-gear nav-icon text-info"></i>
                             <span class="nav-label">Group Order Optimizer</span>
-                            <span class="badge bg-info-subtle text-info ms-auto">Split</span>
+                            <span class="badge bg-info-subtle text-info ms-auto">Split Bill</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ url_for('fridge_vision') }}" class="nav-link {% if request.endpoint == 'fridge_vision' %}active{% endif %}">
                             <i class="fa-solid fa-camera-retro nav-icon text-warning"></i>
                             <span class="nav-label">Fridge Vision AI</span>
-                            <span class="badge bg-warning-subtle text-warning-emphasis ms-auto">Twist</span>
+                            <span class="badge bg-warning-subtle text-warning-emphasis ms-auto">Scan</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ url_for('analytics_dashboard') }}" class="nav-link {% if request.endpoint == 'analytics_dashboard' %}active{% endif %}">
                             <i class="fa-solid fa-chart-pie nav-icon text-danger"></i>
-                            <span class="nav-label">Predictive Analytics</span>
-                            <span class="badge bg-danger-subtle text-danger ms-auto">Chart.js</span>
+                            <span class="nav-label">Kitchen Analytics</span>
+                            <span class="badge bg-danger-subtle text-danger ms-auto">Live</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ url_for('map_view') }}" class="nav-link {% if request.endpoint == 'map_view' %}active{% endif %}">
                             <i class="fa-solid fa-map-location-dot nav-icon text-purple"></i>
                             <span class="nav-label">Live Map & ETA</span>
-                            <span class="badge bg-purple-subtle text-purple ms-auto">Maps</span>
+                            <span class="badge bg-purple-subtle text-purple ms-auto">GPS</span>
                         </a>
                     </li>
                 </ul>
@@ -173,32 +173,49 @@
         <!-- MAIN CONTENT AREA -->
         <!-- ============================================================ -->
         <div class="main-wrapper">
-            <!-- Top App Bar -->
+            <!-- Top App Bar (Zomato-Style Clean Design) -->
             <header class="top-navbar">
                 <div class="d-flex align-items-center gap-3">
                     <button class="btn btn-icon-ghost d-lg-none" id="sidebarToggleBtn">
                         <i class="fa-solid fa-bars-staggered fa-lg"></i>
                     </button>
-                    <div class="page-title-block">
-                        <h1 class="page-main-heading">Online Food Ordering System <span class="badge-ai-pill"><i class="fa-solid fa-bolt me-1"></i>AI Powered</span></h1>
-                        <p class="page-subheading text-muted">Smart cart builder • Surplus food rescue • Group optimizer • Vision AI</p>
+                    <!-- Brand -->
+                    <a href="{{ url_for('index') }}" class="text-decoration-none d-flex align-items-center gap-2">
+                        <span class="brand-logo-badge"><i class="fa-solid fa-utensils"></i></span>
+                        <div class="d-none d-sm-block">
+                            <span class="fs-4 fw-bold text-dark font-brand">FoodFusion</span>
+                            <span class="badge bg-danger-subtle text-danger ms-1 fw-bold">LIVE</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Center: Location Selector like Zomato -->
+                <div class="location-pill-zomato d-none d-md-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addressPickerModal" style="cursor: pointer;">
+                    <i class="fa-solid fa-location-dot text-danger fs-5"></i>
+                    <div class="text-start">
+                        <div class="fw-bold small text-dark d-flex align-items-center gap-1">
+                            <span id="navAddressDisplay">Indiranagar, Bengaluru</span>
+                            <i class="fa-solid fa-chevron-down text-muted" style="font-size: 10px;"></i>
+                        </div>
+                        <small class="text-muted d-block" style="font-size: 11px;">100ft Road, Stage 2</small>
                     </div>
                 </div>
 
-                <div class="top-nav-actions d-flex align-items-center gap-2">
-                    <!-- Quick Location Pill -->
-                    <div class="location-pill d-none d-md-flex align-items-center">
-                        <i class="fa-solid fa-location-dot text-danger me-2"></i>
-                        <span class="fw-medium">Indiranagar 100ft Rd</span>
-                        <span class="badge bg-secondary-subtle text-secondary ms-2">Bengaluru</span>
-                    </div>
-
-                    <!-- Cart Drawer Trigger Button -->
+                <!-- Right: Cart & Login Options -->
+                <div class="top-nav-actions d-flex align-items-center gap-3">
+                    <!-- Cart Trigger Button -->
                     <button class="btn btn-cart-trigger" id="cartOpenBtn" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
-                        <i class="fa-solid fa-bag-shopping me-2"></i>
-                        <span>Cart</span>
-                        <span class="badge rounded-pill bg-danger ms-2" id="cartBadgeCount">0</span>
+                        <i class="fa-solid fa-bag-shopping me-1"></i>
+                        <span class="d-none d-sm-inline">Cart</span>
+                        <span class="badge rounded-pill bg-danger ms-1" id="cartBadgeCount">0</span>
                     </button>
+
+                    <!-- User Account / Login Button (Zomato-Style) -->
+                    <div id="authNavContainer">
+                        <button class="btn btn-outline-danger btn-sm fw-bold px-3 py-1 rounded-pill" data-bs-toggle="modal" data-bs-target="#loginModal" id="loginNavBtn">
+                            <i class="fa-solid fa-user me-1"></i>Log in
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -266,52 +283,332 @@
                     <span class="fw-bold fs-5 text-primary" id="cartGrandTotal">₹0.00</span>
                 </div>
 
-                <button class="btn btn-primary w-100 py-2 fw-bold" id="checkoutBtn" onclick="handleCheckout()">
-                    <i class="fa-solid fa-lock me-2"></i>Place AI Order
+                <button class="btn btn-danger w-100 py-3 fw-bold fs-6 rounded-3 shadow-sm" id="checkoutBtn" onclick="openCheckoutModal()">
+                    <i class="fa-solid fa-bag-shopping me-2"></i>Proceed to Checkout
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Dietary Preferences Modal -->
-    <div class="modal fade" id="prefModal" tabindex="-1" aria-hidden="true">
+    <!-- ============================================================ -->
+    <!-- ZOMATO-STYLE CHECKOUT MODAL (ADDRESS, COUPONS, BILL & PAYMENT) -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger rounded-circle p-2"><i class="fa-solid fa-location-dot text-white"></i></span>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0" id="checkoutModalLabel">Select Delivery Address</h5>
+                            <small class="text-muted">Fast Delivery by FoodFusion Express</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-4">
+                        <!-- Left Column: Address & Delivery Info -->
+                        <div class="col-lg-7">
+                            <div class="card border-0 rounded-3 shadow-sm p-3 mb-3 bg-white">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-house-user text-danger me-2"></i>Delivery Address</h6>
+                                    <!-- Address Tag Pills -->
+                                    <div class="btn-group btn-group-sm" role="group" id="addressTypeGroup">
+                                        <input type="radio" class="btn-check" name="addrType" id="addrHome" value="Home" checked>
+                                        <label class="btn btn-outline-danger py-1 px-2" for="addrHome"><i class="fa-solid fa-house me-1"></i>Home</label>
+                                        <input type="radio" class="btn-check" name="addrType" id="addrWork" value="Work">
+                                        <label class="btn btn-outline-danger py-1 px-2" for="addrWork"><i class="fa-solid fa-briefcase me-1"></i>Work</label>
+                                        <input type="radio" class="btn-check" name="addrType" id="addrOther" value="Other">
+                                        <label class="btn btn-outline-danger py-1 px-2" for="addrOther"><i class="fa-solid fa-location-dot me-1"></i>Other</label>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small text-muted mb-1">Your Name *</label>
+                                        <input type="text" class="form-control form-control-sm rounded-2" id="checkoutName" value="Aman Gupta" placeholder="Full Name">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small text-muted mb-1">Phone Number *</label>
+                                        <input type="tel" class="form-control form-control-sm rounded-2" id="checkoutPhone" value="+91 98450 11223" placeholder="+91 10-digit number">
+                                    </div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted mb-1">Flat / House / Floor / Building *</label>
+                                    <input type="text" class="form-control form-control-sm rounded-2" id="checkoutFlat" value="Flat 402, Green Glen Towers" placeholder="e.g. Flat 302, 3rd Floor">
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small text-muted mb-1">Street / Area / Landmark *</label>
+                                    <input type="text" class="form-control form-control-sm rounded-2" id="checkoutArea" value="100ft Road, Indiranagar, Bengaluru" placeholder="Area or landmark">
+                                </div>
+
+                                <!-- Delivery Instructions Pills (Zomato-style) -->
+                                <label class="form-label small text-muted mb-1 mt-2">Delivery Instructions for Rider</label>
+                                <div class="d-flex gap-2 flex-wrap" id="deliveryInstructions">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill instruction-pill" onclick="toggleInstruction(this, 'Leave at door')">
+                                        🚪 Leave at door
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill instruction-pill" onclick="toggleInstruction(this, 'Call on arrival')">
+                                        📞 Call on arrival
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill instruction-pill" onclick="toggleInstruction(this, 'Avoid ringing bell')">
+                                        🔕 Don't ring bell
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill instruction-pill" onclick="toggleInstruction(this, 'Avoid calling')">
+                                        🚫 Avoid calling
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Payment Options -->
+                            <div class="card border-0 rounded-3 shadow-sm p-3 bg-white">
+                                <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-credit-card text-danger me-2"></i>Payment Method</h6>
+                                <div class="form-check mb-2 p-2 border rounded-2 d-flex align-items-center">
+                                    <input class="form-check-input ms-0 me-3" type="radio" name="paymentOption" id="payUPI" value="upi" checked>
+                                    <label class="form-check-label w-100 fw-medium d-flex justify-content-between align-items-center" for="payUPI">
+                                        <span><i class="fa-brands fa-google-pay text-primary fa-lg me-2"></i>UPI (Google Pay / PhonePe / Paytm)</span>
+                                        <span class="badge bg-success-subtle text-success">Recommended</span>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2 p-2 border rounded-2 d-flex align-items-center">
+                                    <input class="form-check-input ms-0 me-3" type="radio" name="paymentOption" id="payCOD" value="cod">
+                                    <label class="form-check-label w-100 fw-medium d-flex justify-content-between align-items-center" for="payCOD">
+                                        <span><i class="fa-solid fa-money-bill-wave text-success fa-lg me-2"></i>Cash on Delivery (COD)</span>
+                                    </label>
+                                </div>
+                                <div class="form-check p-2 border rounded-2 d-flex align-items-center">
+                                    <input class="form-check-input ms-0 me-3" type="radio" name="paymentOption" id="payCard" value="card">
+                                    <label class="form-check-label w-100 fw-medium d-flex justify-content-between align-items-center" for="payCard">
+                                        <span><i class="fa-solid fa-credit-card text-secondary fa-lg me-2"></i>Credit / Debit Card</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Order Summary & Coupon -->
+                        <div class="col-lg-5">
+                            <!-- Coupon Box -->
+                            <div class="card border-0 rounded-3 shadow-sm p-3 mb-3 bg-white">
+                                <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-ticket text-danger me-2"></i>Offers & Coupons</h6>
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control form-control-sm text-uppercase fw-bold" id="couponCodeInput" placeholder="Enter coupon" value="SAVE50">
+                                    <button class="btn btn-outline-danger btn-sm fw-bold px-3" type="button" onclick="applyCouponCode()">Apply</button>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-danger-subtle text-danger fw-bold cursor-pointer" onclick="setAndApplyCoupon('SAVE50')">
+                                        <i class="fa-solid fa-tag me-1"></i>SAVE50 (₹50 OFF)
+                                    </span>
+                                    <span class="badge bg-success-subtle text-success fw-bold cursor-pointer" onclick="setAndApplyCoupon('WELCOME20')">
+                                        <i class="fa-solid fa-tag me-1"></i>WELCOME20 (20% OFF)
+                                    </span>
+                                </div>
+                                <div id="couponStatusMessage" class="small mt-2 text-success fw-bold d-none">
+                                    <i class="fa-solid fa-check-circle me-1"></i>Coupon SAVE50 applied! ₹50 saved.
+                                </div>
+                            </div>
+
+                            <!-- Bill Details (Transparent like Zomato) -->
+                            <div class="card border-0 rounded-3 shadow-sm p-3 bg-white">
+                                <h6 class="fw-bold mb-3 text-dark">Bill Summary</h6>
+                                <div class="d-flex justify-content-between small text-secondary mb-2">
+                                    <span>Item Total</span>
+                                    <span class="fw-medium text-dark" id="modalItemTotal">₹0.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between small text-secondary mb-2">
+                                    <span>Delivery Partner Fee</span>
+                                    <span class="text-success fw-bold">FREE</span>
+                                </div>
+                                <div class="d-flex justify-content-between small text-secondary mb-2">
+                                    <span>Govt Taxes & Restaurant Packaging (GST 5%)</span>
+                                    <span class="fw-medium text-dark">₹15.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between small text-success mb-2 d-none" id="modalDiscountRow">
+                                    <span>Coupon Discount</span>
+                                    <span class="fw-bold" id="modalDiscountAmount">-₹50.00</span>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="fw-bold fs-6 text-dark">To Pay</span>
+                                    <span class="fw-bold fs-4 text-danger" id="modalGrandTotal">₹0.00</span>
+                                </div>
+
+                                <button class="btn btn-danger w-100 py-3 fw-bold fs-5 rounded-3 shadow" id="confirmOrderBtn" onclick="submitZomatoOrder()">
+                                    <i class="fa-solid fa-lock me-2"></i>Pay & Place Order
+                                </button>
+                                <small class="text-center text-muted d-block mt-2" style="font-size: 11px;">
+                                    <i class="fa-solid fa-shield-halved me-1 text-success"></i>Safe & Secure 256-bit Encrypted Checkout
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ZOMATO-STYLE ORDER CONFIRMATION & LIVE TRACKING MODAL -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="orderSuccessModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-sliders text-primary me-2"></i>Personalize AI Engine</h5>
+            <div class="modal-content border-0 rounded-4 shadow-lg text-center p-4">
+                <div class="success-checkmark-circle mx-auto mb-3">
+                    <i class="fa-solid fa-circle-check text-success fa-4x animate__animated animate__bounceIn"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-1">Order Placed Successfully!</h4>
+                <p class="text-muted small mb-3">Your meal is confirmed and kitchen has started preparing.</p>
+
+                <div class="bg-light rounded-3 p-3 text-start mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted small">Order ID:</span>
+                        <span class="fw-bold text-dark" id="successOrderId">#108</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted small">Estimated Delivery:</span>
+                        <span class="fw-bold text-success" id="successOrderEta">~24 mins</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted small">Delivering to:</span>
+                        <span class="fw-medium text-dark small text-truncate" style="max-width: 220px;" id="successOrderAddress">Flat 402, Indiranagar</span>
+                    </div>
+                </div>
+
+                <!-- 5-Step Order Stepper (Zomato Style) -->
+                <div class="order-stepper-box mb-4">
+                    <div class="d-flex justify-content-between position-relative stepper-line-wrapper">
+                        <div class="step-item active">
+                            <div class="step-circle bg-success text-white"><i class="fa-solid fa-check"></i></div>
+                            <small class="step-label">Placed</small>
+                        </div>
+                        <div class="step-item active">
+                            <div class="step-circle bg-success text-white"><i class="fa-solid fa-utensils"></i></div>
+                            <small class="step-label">Accepted</small>
+                        </div>
+                        <div class="step-item current">
+                            <div class="step-circle bg-warning text-dark"><i class="fa-solid fa-fire fa-spin"></i></div>
+                            <small class="step-label">Preparing</small>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-circle bg-secondary text-white"><i class="fa-solid fa-motorcycle"></i></div>
+                            <small class="step-label">On Way</small>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-circle bg-secondary text-white"><i class="fa-solid fa-house"></i></div>
+                            <small class="step-label">Delivered</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('map_view') }}" class="btn btn-outline-danger w-50 py-2 fw-bold">
+                        <i class="fa-solid fa-map-location-dot me-1"></i>Track on Map
+                    </a>
+                    <button type="button" class="btn btn-danger w-50 py-2 fw-bold" data-bs-dismiss="modal" onclick="resetCartUI()">
+                        Order More Food
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ZOMATO-STYLE LOGIN & QUICK DEMO ACCOUNTS MODAL -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Log in / Sign up</h4>
+                        <p class="text-muted small mb-0">Experience full ordering, address sync & role features</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- Phone Input (Like Zomato) -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">+91</span>
+                            <input type="tel" class="form-control" id="loginPhoneInput" placeholder="Enter 10 digit mobile number" value="9845011223">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-danger w-100 py-2 fw-bold rounded-3 mb-3" onclick="handlePhoneLogin()">
+                        Continue with OTP
+                    </button>
+
+                    <div class="position-relative text-center my-3">
+                        <hr class="text-muted">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">OR 1-CLICK QUICK LOGIN</span>
+                    </div>
+
+                    <!-- 1-Click Role Switcher (Hackathon Ready) -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-light border text-start d-flex align-items-center gap-3 p-2 rounded-3" onclick="quickLoginRole('customer', 'Aman Gupta', '+91 98450 11223', 'Flat 402, Green Glen Towers, Indiranagar')">
+                            <span class="badge bg-primary-subtle text-primary p-2 fs-6"><i class="fa-solid fa-user"></i></span>
+                            <div>
+                                <div class="fw-bold small text-dark">Aman Gupta (Customer)</div>
+                                <small class="text-muted" style="font-size: 11px;">Indiranagar, Bengaluru • Saved Addresses Active</small>
+                            </div>
+                        </button>
+
+                        <button class="btn btn-light border text-start d-flex align-items-center gap-3 p-2 rounded-3" onclick="quickLoginRole('owner', 'Chef Sanjeev (Owner)', '+91 98450 44556', 'Spice Villa Kitchen, Indiranagar')">
+                            <span class="badge bg-warning-subtle text-dark p-2 fs-6"><i class="fa-solid fa-store"></i></span>
+                            <div>
+                                <div class="fw-bold small text-dark">Spice Villa (Restaurant Owner)</div>
+                                <small class="text-muted" style="font-size: 11px;">Manage kitchen orders, menus & surplus food</small>
+                            </div>
+                        </button>
+
+                        <button class="btn btn-light border text-start d-flex align-items-center gap-3 p-2 rounded-3" onclick="quickLoginRole('rider', 'Rohan (Delivery Partner)', '+91 98450 77889', 'Bengaluru Central Hub')">
+                            <span class="badge bg-success-subtle text-success p-2 fs-6"><i class="fa-solid fa-motorcycle"></i></span>
+                            <div>
+                                <div class="fw-bold small text-dark">Rohan Verma (Delivery Partner)</div>
+                                <small class="text-muted" style="font-size: 11px;">Accept deliveries, live GPS & daily earnings</small>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Address Picker Modal -->
+    <div class="modal fade" id="addressPickerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-location-dot text-danger me-2"></i>Select Delivery Location</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="prefForm">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Dietary Constraint</label>
-                            <select class="form-select" id="prefDiet">
-                                <option value="none">Any / Flexitarian</option>
-                                <option value="veg">Pure Vegetarian Only</option>
-                                <option value="non-veg">Non-Vegetarian / High-Protein</option>
-                            </select>
+                <div class="list-group">
+                    <button type="button" class="list-group-item list-group-item-action p-3 d-flex align-items-start gap-3 active" onclick="selectQuickLocation('Indiranagar 100ft Rd', 'Flat 402, Green Glen Towers')">
+                        <i class="fa-solid fa-house mt-1 text-danger"></i>
+                        <div>
+                            <div class="fw-bold">Home (Indiranagar)</div>
+                            <small class="text-muted">Flat 402, Green Glen Towers, 100ft Road, Bengaluru</small>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Spice Preference</label>
-                            <select class="form-select" id="prefSpice">
-                                <option value="mild">Mild (Comfort / Low Heat)</option>
-                                <option value="medium" selected>Medium (Standard)</option>
-                                <option value="spicy">Spicy (Fiery / Authentic)</option>
-                            </select>
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action p-3 d-flex align-items-start gap-3" onclick="selectQuickLocation('Koramangala 4th Block', 'Innovate Tech Park, 4th Floor')">
+                        <i class="fa-solid fa-briefcase mt-1 text-primary"></i>
+                        <div>
+                            <div class="fw-bold">Work (Koramangala)</div>
+                            <small class="text-muted">Innovate Tech Park, 4th Block, Koramangala, Bengaluru</small>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Target Meal Budget (₹)</label>
-                            <input type="number" class="form-control" id="prefBudget" value="350" min="100" max="2000">
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action p-3 d-flex align-items-start gap-3" onclick="selectQuickLocation('HSR Layout Sector 3', 'Villa 12, Rosewood Garden')">
+                        <i class="fa-solid fa-location-pin mt-1 text-warning"></i>
+                        <div>
+                            <div class="fw-bold">Other (HSR Layout)</div>
+                            <small class="text-muted">Villa 12, Rosewood Garden, Sector 3, HSR Layout, Bengaluru</small>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-medium">Favorite Cuisines</label>
-                            <input type="text" class="form-control" id="prefCuisines" value="North Indian, Biryani, Healthy Bowls">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="savePreferences()">Save & Retrain Scikit-Learn Model</button>
+                    </button>
                 </div>
             </div>
         </div>

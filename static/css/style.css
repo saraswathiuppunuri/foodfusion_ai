@@ -682,3 +682,108 @@ h1, h2, h3, h4, h5, h6, .brand-title, .page-main-heading {
         margin-left: 0;
     }
 }
+
+/* ===================================================================
+   ZOMATO-STYLE UI ENHANCEMENTS
+   =================================================================== */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.brand-logo-badge {
+    width: 38px;
+    height: 38px;
+    background: #e23744;
+    color: white;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(226, 55, 68, 0.3);
+}
+
+.font-brand {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.5px;
+}
+
+.location-pill-zomato {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.4rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.location-pill-zomato:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.instruction-pill {
+    transition: all 0.15s ease;
+    font-weight: 500;
+}
+
+.instruction-pill.active {
+    background-color: #e23744 !important;
+    border-color: #e23744 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(226, 55, 68, 0.3);
+}
+
+/* Stepper (Zomato-style) */
+.order-stepper-box {
+    padding: 1rem 0.5rem;
+}
+
+.stepper-line-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.step-item {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.step-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.step-item.active .step-label {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.step-item.current .step-label {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
