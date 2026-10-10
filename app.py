@@ -267,39 +267,51 @@ def process_fridge_vision():
     db = get_db()
     try:
         all_dishes = [d.to_dict() for d in db.query(Dish).all()]
+    except Exception as e:
+        print(f"[!] DB fetch error in fridge-vision: {e}")
+        all_dishes = []
     finally:
         db.close()
 
-    # Check if file uploaded
-    image_path = None
-    if 'image' in request.files:
-        file = request.files['image']
-        if file and file.filename and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(save_path)
-            image_path = save_path
+    try:
+        image_path = None
+        # Check if file uploaded
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(save_path)
+                image_path = save_path
 
-    # If no file uploaded or using sample
-    sample_key = request.form.get('sample') or (request.get_json() or {}).get('sample')
-    if not image_path:
-        # Create a sample synthetic fridge image if none exists
-        sample_filename = "sample_fridge.jpg"
-        sample_path = os.path.join(app.config['UPLOAD_FOLDER'], sample_filename)
-        if not os.path.exists(sample_path):
-            import numpy as np
-            import cv2
-            blank = np.zeros((300, 400, 3), dtype=np.uint8)
-            # Add colored patches simulating tomatoes (red), paneer (white), capsicum (green)
-            blank[40:140, 40:140] = [30, 40, 220] # Red tomatoes
-            blank[40:140, 220:340] = [230, 240, 240] # White paneer
-            blank[180:260, 60:180] = [40, 180, 50] # Green capsicum
-            blank[180:260, 220:340] = [30, 180, 220] # Yellow cheese
-            cv2.imwrite(sample_path, blank)
-        image_path = sample_path
+        # If no file uploaded or using sample
+        sample_key = request.form.get('sample')
+        if not sample_key and request.is_json:
+            sample_key = (request.get_json(silent=True) or {}).get('sample')
 
-    result = analyze_fridge_image(image_path, all_dishes)
-    return jsonify(result)
+        if not image_path:
+            sample_filename = "sample_fridge.jpg"
+            sample_path = os.path.join(app.config['UPLOAD_FOLDER'], sample_filename)
+            if not os.path.exists(sample_path):
+                try:
+                    import numpy as np
+                    import cv2
+                    blank = np.zeros((300, 400, 3), dtype=np.uint8)
+                    blank[40:140, 40:140] = [30, 40, 220]
+                    blank[40:140, 220:340] = [230, 240, 240]
+                    blank[180:260, 60:180] = [40, 180, 50]
+                    blank[180:260, 220:340] = [30, 180, 220]
+                    cv2.imwrite(sample_path, blank)
+                except Exception:
+                    pass
+            image_path = sample_path if os.path.exists(sample_path) else None
+
+        result = analyze_fridge_image(image_path or "", all_dishes)
+        return jsonify(result)
+    except Exception as e:
+        print(f"[!] Error in process_fridge_vision: {e}")
+        result = analyze_fridge_image("", all_dishes)
+        return jsonify(result)
 
 # Place Order API
 @app.route('/api/place-order', methods=['POST'])
