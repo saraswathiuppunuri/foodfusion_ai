@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Online Food Ordering System — Powered by AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- ============================================================ -->
+    <!-- FEATURE 1: AI NATURAL-LANGUAGE ORDERING HERO -->
+    <!-- ============================================================ -->
+    <section class="nl-hero-card mb-4">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <span class="badge bg-white text-primary fw-bold mb-2 px-3 py-1 text-uppercase tracking-wider">
+                    <i class="fa-solid fa-sparkles me-1"></i> Feature 1: AI Natural-Language Ordering
+                </span>
+                <h2 class="fw-extrabold text-white mb-2">Speak or Type What You Crave. AI Builds Your Cart.</h2>
+                <p class="text-indigo-200 mb-4" style="color: #c7d2fe; max-width: 780px;">
+                    Our constraint-satisfaction AI parses budgets, headcount, dietaries, and spice preferences simultaneously to build an optimized, explainable cart in milliseconds.
+                </p>
+
+                <!-- Prompt Input Bar -->
+                <div class="nl-prompt-container">
+                    <i class="fa-solid fa-robot text-primary ms-3 fa-lg"></i>
+                    <input type="text" id="nlPromptInput" class="nl-prompt-input" 
+                           placeholder="Type: 'I need dinner for three people under ₹500, two vegetarian meals and one spicy meal.'"
+                           value="I need dinner for three people under ₹500, two vegetarian meals and one spicy meal.">
+                    <button class="btn btn-ai-generate" id="nlSubmitBtn">
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Build Smart Cart
+                    </button>
+                </div>
+
+                <!-- One-click prompt chips -->
+                <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
+                    <span class="small text-white-50 fw-semibold"><i class="fa-solid fa-lightbulb me-1"></i>Try Prompts:</span>
+                    <button class="preset-chip" onclick="setPresetPrompt('I need dinner for three people under ₹500, two vegetarian meals and one spicy meal.')">
+                        “Dinner for 3 under ₹500, 2 veg, 1 spicy”
+                    </button>
+                    <button class="preset-chip" onclick="setPresetPrompt('High protein lunch under ₹200 with chicken or soya')">
+                        “High protein lunch under ₹200”
+                    </button>
+                    <button class="preset-chip" onclick="setPresetPrompt('Quick light dinner for 2 people under ₹300 pure vegetarian')">
+                        “Light dinner for 2 under ₹300 veg”
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dynamic AI Solution Container (Injected by JavaScript) -->
+    <div id="nlResultSection"></div>
+
+    <!-- ============================================================ -->
+    <!-- FEATURE 2: SMART SURPLUS FOOD MARKETPLACE (ZERO-WASTE) -->
+    <!-- ============================================================ -->
+    <section class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h3 class="fw-bold mb-0">🌱 Smart Surplus Food Marketplace</h3>
+                    <span class="badge bg-success-subtle text-success fw-bold px-3 py-1">Feature 2 • Zero Waste</span>
+                </div>
+                <p class="text-muted small mb-0">Fresh, surplus meals discounted up to 60%. Save money while preventing food waste.</p>
+            </div>
+            <a href="{{ url_for('surplus_marketplace') }}" class="btn btn-outline-success btn-sm fw-bold px-3">
+                View All Deals & Impact <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            {% for deal in surplus_deals[:4] %}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="dish-card">
+                    <div class="dish-thumb-wrapper">
+                        <img src="{{ deal.image_url }}" class="dish-img" alt="{{ deal.dish_name }}">
+                        <span class="badge-diet {% if deal.is_veg %}badge-diet-veg{% else %}badge-diet-nonveg{% endif %}">
+                            {{ 'VEG' if deal.is_veg else 'NON-VEG' }}
+                        </span>
+                        <span class="badge-discount-float">{{ deal.discount_percent }}% OFF</span>
+                    </div>
+                    <div class="dish-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-warning-subtle text-dark fw-bold">
+                                <i class="fa-solid fa-stopwatch me-1"></i>{{ deal.remaining_minutes }} mins left
+                            </span>
+                            <small class="text-success fw-bold"><i class="fa-solid fa-leaf me-1"></i>Saves {{ deal.waste_saved_kg }}kg waste</small>
+                        </div>
+                        <h5 class="dish-title">{{ deal.dish_name }}</h5>
+                        <p class="dish-desc small text-muted">{{ deal.restaurant_name }}</p>
+                        
+                        <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="fs-5 fw-bold text-success">₹{{ "%.2f"|format(deal.discounted_price) }}</span>
+                                <span class="text-decoration-line-through text-muted small ms-1">₹{{ "%.2f"|format(deal.original_price) }}</span>
+                            </div>
+                            <button class="btn btn-success btn-sm fw-bold px-3" onclick="buySurplusDirect({{ deal.id }}, '{{ deal.dish_name }}')">
+                                <i class="fa-solid fa-bag-shopping me-1"></i>Rescue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- UNIQUE TWIST BANNER: FRIDGE-TO-PLATE VISION AI -->
+    <!-- ============================================================ -->
+    <section class="card border-0 rounded-4 shadow-sm p-4 mb-5" style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-left: 6px solid #f97316 !important;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark fw-bold mb-2">
+                    <i class="fa-solid fa-camera me-1"></i> Unique Innovation Twist: Computer Vision
+                </span>
+                <h3 class="fw-bold text-dark mb-2">Snap Your Fridge: Cook at Home vs. Order Delivery!</h3>
+                <p class="text-secondary mb-3">
+                    Upload a photo of your fridge ingredients. Our Computer Vision AI detects what you have, matches gourmet restaurant equivalents, and gives you a <strong>side-by-side cost, effort, and time breakdown</strong> to help you decide whether to cook or order.
+                </p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('fridge_vision') }}" class="btn btn-warning fw-bold px-4 text-dark shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Launch Fridge Vision Scanner
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mt-3 mt-lg-0">
+                <div class="p-3 bg-white rounded-3 shadow-sm d-inline-block">
+                    <div class="d-flex align-items-center justify-content-center gap-3">
+                        <div class="text-center">
+                            <span class="badge bg-secondary mb-1">Cook at Home</span>
+                            <div class="fw-bold text-danger">45 mins + 3 pots</div>
+                        </div>
+                        <div class="battle-vs-badge" style="width: 36px; height: 36px; font-size: 0.85rem;">VS</div>
+                        <div class="text-center">
+                            <span class="badge bg-success mb-1">Order Delivery</span>
+                            <div class="fw-bold text-success">22 mins delivered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- FEATURE 4: EXPLAINABLE FOOD RECOMMENDATIONS (SCIKIT-LEARN) -->
+    <!-- ============================================================ -->
+    <section class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h3 class="fw-bold mb-0">🎯 For You: Explainable Recommendations</h3>
+                    <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1">Feature 4 • Scikit-Learn TF-IDF</span>
+                </div>
+                <p class="text-muted small mb-0">Personalized matching with full AI transparency explaining why every meal was selected.</p>
+            </div>
+            <button class="btn btn-outline-primary btn-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#prefModal">
+                <i class="fa-solid fa-sliders me-1"></i>Tune AI Taste Profile
+            </button>
+        </div>
+
+        <div class="row g-3" id="recommendationsContainer">
+            <!-- Dynamically populated or rendered with initial dishes -->
+            {% for dish in dishes[:3] %}
+            <div class="col-md-4">
+                <div class="dish-card">
+                    <div class="dish-thumb-wrapper">
+                        <img src="{{ dish.image_url }}" class="dish-img" alt="{{ dish.name }}">
+                        <span class="badge-diet {% if dish.is_veg %}badge-diet-veg{% else %}badge-diet-nonveg{% endif %}">
+                            {{ 'VEG' if dish.is_veg else 'NON-VEG' }}
+                        </span>
+                        <span class="badge-discount-float" style="background: #4f46e5;">95% Match</span>
+                    </div>
+                    <div class="dish-body">
+                        <!-- Explainability Box -->
+                        <div class="explainable-badge-box">
+                            <i class="fa-solid fa-brain me-1"></i>
+                            <strong>Why AI selected:</strong> Matches your high-protein North Indian preferences & stays comfortably under target budget.
+                        </div>
+
+                        <h5 class="dish-title">{{ dish.name }}</h5>
+                        <p class="dish-desc">{{ dish.description }}</p>
+
+                        <div class="dish-meta-tags">
+                            <span class="meta-pill"><i class="fa-solid fa-fire text-danger me-1"></i>{{ dish.calories }} kcal</span>
+                            <span class="meta-pill"><i class="fa-solid fa-dumbbell text-primary me-1"></i>{{ dish.protein_g }}g protein</span>
+                            <span class="meta-pill text-uppercase">{{ dish.spice_level }}</span>
+                        </div>
+
+                        <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                            <span class="fs-5 fw-bold text-dark">₹{{ "%.2f"|format(dish.price) }}</span>
+                            <button class="btn btn-primary btn-sm fw-bold px-3" onclick="addToCart({{ dish.id }}, '{{ dish.name }}', {{ dish.price }}, '{{ dish.restaurant_name }}', '{{ dish.image_url }}', {{ 'true' if dish.is_veg else 'false' }})">
+                                <i class="fa-solid fa-plus me-1"></i>Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- COMPLETE RESTAURANT MENU EXPLORER -->
+    <!-- ============================================================ -->
+    <section class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <h3 class="fw-bold mb-0">🍽️ Explore Full Menu Catalog</h3>
+                <p class="text-muted small mb-0">From top-rated local kitchens in Bengaluru</p>
+            </div>
+            <!-- Filter Pills -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary active" onclick="filterMenu('all')">All</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="filterMenu('veg')">🌱 Pure Veg</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="filterMenu('spicy')">🌶️ Spicy</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="filterMenu('protein')">💪 High Protein</button>
+            </div>
+        </div>
+
+        <div class="row g-3" id="allMenuContainer">
+            {% for dish in dishes %}
+            <div class="col-xl-3 col-lg-4 col-md-6 menu-card-item" 
+                 data-veg="{{ 'true' if dish.is_veg else 'false' }}"
+                 data-spice="{{ dish.spice_level }}"
+                 data-protein="{{ dish.protein_g }}">
+                <div class="dish-card">
+                    <div class="dish-thumb-wrapper">
+                        <img src="{{ dish.image_url }}" class="dish-img" alt="{{ dish.name }}">
+                        <span class="badge-diet {% if dish.is_veg %}badge-diet-veg{% else %}badge-diet-nonveg{% endif %}">
+                            {{ 'VEG' if dish.is_veg else 'NON-VEG' }}
+                        </span>
+                    </div>
+                    <div class="dish-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small fw-medium">{{ dish.restaurant_name }}</span>
+                            <span class="badge bg-light text-dark">{{ dish.spice_level.upper() }}</span>
+                        </div>
+                        <h5 class="dish-title">{{ dish.name }}</h5>
+                        <p class="dish-desc">{{ dish.description }}</p>
+
+                        <div class="dish-meta-tags">
+                            <span class="meta-pill">{{ dish.calories }} kcal</span>
+                            <span class="meta-pill">{{ dish.protein_g }}g protein</span>
+                        </div>
+
+                        <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                            <span class="fs-5 fw-bold text-dark">₹{{ "%.2f"|format(dish.price) }}</span>
+                            <button class="btn btn-outline-primary btn-sm fw-bold px-3" onclick="addToCart({{ dish.id }}, '{{ dish.name }}', {{ dish.price }}, '{{ dish.restaurant_name }}', '{{ dish.image_url }}', {{ 'true' if dish.is_veg else 'false' }})">
+                                <i class="fa-solid fa-plus me-1"></i>Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterMenu(filterType) {
+    const cards = document.querySelectorAll('.menu-card-item');
+    cards.forEach(card => {
+        if (filterType === 'all') {
+            card.classList.remove('d-none');
+        } else if (filterType === 'veg') {
+            card.classList.toggle('d-none', card.dataset.veg !== 'true');
+        } else if (filterType === 'spicy') {
+            card.classList.toggle('d-none', card.dataset.spice !== 'spicy');
+        } else if (filterType === 'protein') {
+            card.classList.toggle('d-none', parseInt(card.dataset.protein || 0) < 20);
+        }
+    });
+}
+
+function buySurplusDirect(dealId, dishName) {
+    fetch(`/api/surplus/buy/${dealId}`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showToast(`🎉 Rescued ${dishName}! You prevented 0.45 kg of food waste.`, "success");
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(data.message, "danger");
+        }
+    });
+}
+</script>
+{% endblock %}

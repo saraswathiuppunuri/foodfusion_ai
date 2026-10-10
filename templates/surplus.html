@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Surplus Food Marketplace — Zero Waste AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Header Banner -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); color: white;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-success fw-bold mb-2 px-3 py-1 text-uppercase">
+                    <i class="fa-solid fa-leaf me-1"></i> Feature 2: Smart Surplus Food Marketplace
+                </span>
+                <h2 class="fw-bold text-white mb-2">Rescue Fresh Food. Slash Prices by up to 65%.</h2>
+                <p class="text-white-50 mb-3" style="max-width: 680px;">
+                    Every evening, restaurants list eligible unsold portions and freshly prepared batches at steep discounts before closing. You get delicious, high-quality meals while preventing avoidable environmental waste.
+                </p>
+                <div class="d-flex gap-3 align-items-center flex-wrap">
+                    <button class="btn btn-success fw-bold px-4" data-bs-toggle="modal" data-bs-target="#addSurplusModal">
+                        <i class="fa-solid fa-plus me-1"></i>List Restaurant Surplus
+                    </button>
+                    <span class="text-white-50 small"><i class="fa-solid fa-shield-halved text-success me-1"></i>FSSAI Inspected & Safe</span>
+                </div>
+            </div>
+            <div class="col-lg-4 mt-3 mt-lg-0">
+                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="small text-uppercase tracking-wider text-success fw-bold mb-2">Live Collective Eco-Impact</div>
+                    <div class="d-flex justify-content-between text-center">
+                        <div>
+                            <div class="fs-3 fw-bold text-white">{{ total_waste_saved }} <small class="fs-6">kg</small></div>
+                            <small class="text-white-50">Food Saved</small>
+                        </div>
+                        <div style="width: 1px; background: rgba(255,255,255,0.2);"></div>
+                        <div>
+                            <div class="fs-3 fw-bold text-white">{{ total_co2_saved }} <small class="fs-6">kg</small></div>
+                            <small class="text-white-50">CO₂ Averted</small>
+                        </div>
+                        <div style="width: 1px; background: rgba(255,255,255,0.2);"></div>
+                        <div>
+                            <div class="fs-3 fw-bold text-warning">60%</div>
+                            <small class="text-white-50">Avg Discount</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Surplus Deals List -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="fw-bold mb-0">🔥 Active Flash Deals Near You</h4>
+        <span class="badge bg-light text-dark fw-medium">{{ deals|length }} Active Batches</span>
+    </div>
+
+    <div class="row g-4">
+        {% for deal in deals %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="dish-card">
+                <div class="dish-thumb-wrapper">
+                    <img src="{{ deal.image_url }}" class="dish-img" alt="{{ deal.dish_name }}">
+                    <span class="badge-diet {% if deal.is_veg %}badge-diet-veg{% else %}badge-diet-nonveg{% endif %}">
+                        {{ 'VEG' if deal.is_veg else 'NON-VEG' }}
+                    </span>
+                    <span class="badge-discount-float">{{ deal.discount_percent }}% OFF</span>
+                </div>
+                <div class="dish-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="badge bg-warning-subtle text-dark fw-bold">
+                            <i class="fa-solid fa-stopwatch me-1"></i>{{ deal.remaining_minutes }} mins left
+                        </span>
+                        <span class="badge bg-light text-secondary">
+                            {{ deal.quantity_available }} left
+                        </span>
+                    </div>
+
+                    <h5 class="dish-title">{{ deal.dish_name }}</h5>
+                    <div class="text-muted small mb-2"><i class="fa-solid fa-store me-1"></i>{{ deal.restaurant_name }}</div>
+                    
+                    <div class="p-2 rounded bg-light small mb-3 border">
+                        <div class="d-flex justify-content-between text-muted">
+                            <span><i class="fa-solid fa-leaf text-success me-1"></i>Saves:</span>
+                            <span class="fw-bold text-success">{{ deal.waste_saved_kg }} kg food</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted mt-1">
+                            <span><i class="fa-solid fa-cloud text-primary me-1"></i>CO₂ offset:</span>
+                            <span class="fw-bold text-primary">{{ deal.co2_saved_kg }} kg</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fs-4 fw-bold text-success">₹{{ "%.2f"|format(deal.discounted_price) }}</span>
+                            <span class="text-decoration-line-through text-muted small ms-1">₹{{ "%.2f"|format(deal.original_price) }}</span>
+                        </div>
+                        <button class="btn btn-success fw-bold px-3" onclick="buySurplusDirect({{ deal.id }}, '{{ deal.dish_name }}')">
+                            <i class="fa-solid fa-bag-shopping me-1"></i>Rescue Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <h5 class="text-muted">No surplus items listed right now. Check back in 30 minutes!</h5>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Modal: Add Surplus Deal (Restaurant Portal) -->
+<div class="modal fade" id="addSurplusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-store text-success me-2"></i>Restaurant Surplus Lister</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="surplusForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Select Restaurant</label>
+                        <select class="form-select" id="surplusRestaurant" required>
+                            {% for r in restaurants %}
+                            <option value="{{ r.id }}">{{ r.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Select Surplus Dish</label>
+                        <select class="form-select" id="surplusDish" required>
+                            {% for d in dishes %}
+                            <option value="{{ d.id }}" data-price="{{ d.price }}">{{ d.name }} (Original: ₹{{ d.price }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-medium">Original Price (₹)</label>
+                            <input type="number" class="form-control" id="surplusOrigPrice" value="160" readonly>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-medium">Discounted Price (₹)</label>
+                            <input type="number" class="form-control" id="surplusDiscountPrice" value="79" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-medium">Portions Available</label>
+                            <input type="number" class="form-control" id="surplusQuantity" value="5" min="1" max="50">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-medium">Expires in (Mins)</label>
+                            <input type="number" class="form-control" id="surplusExpireMin" value="60" min="15" max="180">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success fw-bold" onclick="submitSurplusDeal()">
+                    <i class="fa-solid fa-leaf me-1"></i>Publish Flash Rescue Deal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('surplusDish').addEventListener('change', function() {
+    const selected = this.options[this.selectedIndex];
+    const origPrice = parseFloat(selected.dataset.price || 160);
+    document.getElementById('surplusOrigPrice').value = origPrice;
+    document.getElementById('surplusDiscountPrice').value = Math.round(origPrice * 0.5);
+});
+
+function submitSurplusDeal() {
+    const dishId = document.getElementById('surplusDish').value;
+    const restaurantId = document.getElementById('surplusRestaurant').value;
+    const orig = document.getElementById('surplusOrigPrice').value;
+    const disc = document.getElementById('surplusDiscountPrice').value;
+    const qty = document.getElementById('surplusQuantity').value;
+    const expireMin = document.getElementById('surplusExpireMin').value;
+
+    fetch('/api/surplus/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            dish_id: dishId,
+            restaurant_id: restaurantId,
+            original_price: orig,
+            discounted_price: disc,
+            quantity: qty,
+            expire_minutes: expireMin
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showToast("Surplus deal published successfully!", "success");
+            location.reload();
+        } else {
+            showToast("Failed to publish deal", "danger");
+        }
+    });
+}
+</script>
+{% endblock %}

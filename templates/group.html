@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}AI Group Order Optimizer — Online Food Ordering System{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Header Banner -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white;">
+        <span class="badge bg-info text-dark fw-bold mb-2 px-3 py-1 text-uppercase">
+            <i class="fa-solid fa-users-gear me-1"></i> Feature 3: AI Group Order Optimizer
+        </span>
+        <h2 class="fw-bold text-white mb-2">Order Together Without the Group Chat Chaos.</h2>
+        <p class="text-indigo-200 mb-0" style="color: #c7d2fe; max-width: 750px;">
+            Input each friend's individual budget, spice preference, and dietary rules. Our AI solver finds the optimal dish combo, minimizes multi-restaurant delivery overhead, and automatically calculates each person's exact fair-share bill!
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Friends Input Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-user-group text-primary me-2"></i>Group Members</h5>
+                    <button class="btn btn-outline-primary btn-sm fw-bold" onclick="addMemberRow()">
+                        <i class="fa-solid fa-user-plus me-1"></i>Add Friend
+                    </button>
+                </div>
+
+                <div id="membersContainer" class="d-flex flex-column gap-3 mb-4">
+                    <!-- Member 1 -->
+                    <div class="member-card p-3 rounded-3 border bg-light" data-member-id="1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <input type="text" class="form-control form-control-sm fw-bold member-name" value="Rahul (Host)" style="max-width: 160px;">
+                            <span class="badge bg-secondary-subtle text-dark">Member #1</span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small text-muted">Budget (₹)</label>
+                                <input type="number" class="form-control form-control-sm member-budget" value="200" min="50" max="1000">
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted">Diet</label>
+                                <select class="form-select form-select-sm member-diet">
+                                    <option value="veg" selected>Vegetarian</option>
+                                    <option value="non-veg">Non-Veg</option>
+                                    <option value="any">Any</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <label class="small text-muted">Spice Preference</label>
+                                <select class="form-select form-select-sm member-spice">
+                                    <option value="mild" selected>Mild / Medium</option>
+                                    <option value="spicy">Fiery Spicy</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Member 2 -->
+                    <div class="member-card p-3 rounded-3 border bg-light" data-member-id="2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <input type="text" class="form-control form-control-sm fw-bold member-name" value="Priya" style="max-width: 160px;">
+                            <button class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.member-card').remove()"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small text-muted">Budget (₹)</label>
+                                <input type="number" class="form-control form-control-sm member-budget" value="250" min="50" max="1000">
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted">Diet</label>
+                                <select class="form-select form-select-sm member-diet">
+                                    <option value="veg">Vegetarian</option>
+                                    <option value="non-veg" selected>Non-Veg</option>
+                                    <option value="any">Any</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <label class="small text-muted">Spice Preference</label>
+                                <select class="form-select form-select-sm member-spice">
+                                    <option value="mild">Mild / Medium</option>
+                                    <option value="spicy" selected>Fiery Spicy</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Member 3 -->
+                    <div class="member-card p-3 rounded-3 border bg-light" data-member-id="3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <input type="text" class="form-control form-control-sm fw-bold member-name" value="Amit" style="max-width: 160px;">
+                            <button class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.member-card').remove()"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small text-muted">Budget (₹)</label>
+                                <input type="number" class="form-control form-control-sm member-budget" value="180" min="50" max="1000">
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted">Diet</label>
+                                <select class="form-select form-select-sm member-diet">
+                                    <option value="veg" selected>Vegetarian</option>
+                                    <option value="non-veg">Non-Veg</option>
+                                    <option value="any">Any</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <label class="small text-muted">Spice Preference</label>
+                                <select class="form-select form-select-sm member-spice">
+                                    <option value="mild" selected>Mild / Medium</option>
+                                    <option value="spicy">Fiery Spicy</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-100 py-2 fw-bold mt-auto" id="optimizeGroupBtn" onclick="runGroupOptimization()">
+                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Run AI Group Optimization
+                </button>
+            </div>
+        </div>
+
+        <!-- Optimized Solution & Bill Breakdown -->
+        <div class="col-lg-7">
+            <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100" id="groupResultCard">
+                <div class="text-center my-auto py-5" id="groupEmptyPlaceholder">
+                    <div class="empty-icon-circle mx-auto mb-3" style="width: 70px; height: 70px; background: #eef2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-calculator fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold">Ready to Optimize</h5>
+                    <p class="text-muted small">Set your friends' budgets and preferences on the left, then click 'Run AI Group Optimization'.</p>
+                </div>
+
+                <div id="groupActiveResult" class="d-none">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let memberCounter = 3;
+
+function addMemberRow() {
+    memberCounter++;
+    const container = document.getElementById('membersContainer');
+    const div = document.createElement('div');
+    div.className = 'member-card p-3 rounded-3 border bg-light';
+    div.dataset.memberId = memberCounter;
+    div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <input type="text" class="form-control form-control-sm fw-bold member-name" value="Friend #${memberCounter}" style="max-width: 160px;">
+            <button class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.member-card').remove()"><i class="fa-solid fa-trash"></i></button>
+        </div>
+        <div class="row g-2">
+            <div class="col-6">
+                <label class="small text-muted">Budget (₹)</label>
+                <input type="number" class="form-control form-control-sm member-budget" value="200" min="50" max="1000">
+            </div>
+            <div class="col-6">
+                <label class="small text-muted">Diet</label>
+                <select class="form-select form-select-sm member-diet">
+                    <option value="veg">Vegetarian</option>
+                    <option value="non-veg">Non-Veg</option>
+                    <option value="any">Any</option>
+                </select>
+            </div>
+            <div class="col-12 mt-2">
+                <label class="small text-muted">Spice Preference</label>
+                <select class="form-select form-select-sm member-spice">
+                    <option value="mild">Mild / Medium</option>
+                    <option value="spicy">Fiery Spicy</option>
+                </select>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function runGroupOptimization() {
+    const cards = document.querySelectorAll('.member-card');
+    const members = [];
+
+    cards.forEach(card => {
+        members.push({
+            name: card.querySelector('.member-name').value.trim() || 'Friend',
+            budget: parseFloat(card.querySelector('.member-budget').value || 200),
+            diet_preference: card.querySelector('.member-diet').value,
+            spice_preference: card.querySelector('.member-spice').value
+        });
+    });
+
+    const btn = document.getElementById('optimizeGroupBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Computing Fair Solution...`;
+
+    fetch('/api/group-optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ members: members })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            renderGroupSolution(data);
+        } else {
+            showToast(data.message, "danger");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Error optimizing group order", "danger");
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles me-2"></i>Run AI Group Optimization`;
+    });
+}
+
+function renderGroupSolution(data) {
+    document.getElementById('groupEmptyPlaceholder').classList.add('d-none');
+    const resDiv = document.getElementById('groupActiveResult');
+    resDiv.classList.remove('d-none');
+
+    let membersHtml = data.breakdowns.map(m => `
+        <div class="p-3 mb-2 rounded-3 border bg-light d-flex align-items-center justify-content-between">
+            <div>
+                <div class="fw-bold">${m.name}</div>
+                <div class="small text-primary fw-medium">${m.dish_name} <small class="text-muted">(${m.restaurant})</small></div>
+                <div class="small text-muted">Base: ₹${m.base_price.toFixed(2)} + GST: ₹${m.gst_share.toFixed(2)} + Deliv: ₹${m.delivery_share.toFixed(2)}</div>
+            </div>
+            <div class="text-end">
+                <div class="fs-5 fw-bold text-dark">₹${m.final_payable.toFixed(2)}</div>
+                <small class="${m.is_under_budget ? 'text-success' : 'text-danger'} fw-bold">
+                    ${m.is_under_budget ? `Save ₹${m.balance.toFixed(2)}` : `Over by ₹${Math.abs(m.balance).toFixed(2)}`}
+                </small>
+            </div>
+        </div>
+    `).join('');
+
+    resDiv.innerHTML = `
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="fw-bold mb-0 text-success"><i class="fa-solid fa-circle-check me-2"></i>Optimized Group Order</h5>
+            <span class="badge bg-success-subtle text-success fw-bold px-3 py-2">
+                ${data.is_overall_under_budget ? `Within Budget (Saved ₹${data.group_savings.toFixed(2)})` : 'Optimized'}
+            </span>
+        </div>
+
+        <div class="alert alert-primary border-0 rounded-3 mb-3 small">
+            <i class="fa-solid fa-sparkles me-1"></i>${data.summary}
+        </div>
+
+        <h6 class="fw-bold mb-2">Individual Itemized Shares:</h6>
+        ${membersHtml}
+
+        <div class="border-top pt-3 mt-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>Food Cost: ₹${data.total_food_cost.toFixed(2)}</span>
+                <span>GST: ₹${data.gst_total.toFixed(2)}</span>
+                <span>Shared Delivery: ₹${data.delivery_fee_total.toFixed(2)}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold fs-5">Combined Grand Total</span>
+                <span class="fw-bold fs-4 text-primary">₹${data.grand_total.toFixed(2)}</span>
+            </div>
+            <button class="btn btn-primary w-100 py-2 fw-bold" onclick="showToast('Group order locked! Proceeding to single checkout.', 'success')">
+                <i class="fa-solid fa-cart-shopping me-2"></i>Lock Group Order & Place
+            </button>
+        </div>
+    `;
+}
+</script>
+{% endblock %}

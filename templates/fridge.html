@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Fridge-to-Plate Vision AI — Cook at Home vs. Order Delivery{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Header Banner -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #7c2d12 0%, #431407 100%); color: white;">
+        <span class="badge bg-warning text-dark fw-bold mb-2 px-3 py-1 text-uppercase">
+            <i class="fa-solid fa-camera-retro me-1"></i> Unique Innovation Twist: Computer Vision
+        </span>
+        <h2 class="fw-bold text-white mb-2">Fridge-to-Plate Vision: Cook at Home vs. Order Delivery</h2>
+        <p class="text-orange-200 mb-0" style="color: #fed7aa; max-width: 750px;">
+            Snap or upload a photo of your refrigerator ingredients. Our OpenCV image recognition detects what you have, matches gourmet restaurant equivalents, and delivers a transparent side-by-side battle: <strong>Should you spend time cooking or order delivery?</strong>
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Upload & Scan Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-camera text-primary me-2"></i>1. Capture or Upload Fridge</h5>
+                
+                <!-- Upload Dropzone -->
+                <div class="border border-2 border-dashed rounded-4 p-4 text-center bg-light mb-3" id="dropzoneBox" style="cursor: pointer;" onclick="document.getElementById('fridgeFileInput').click()">
+                    <i class="fa-solid fa-cloud-arrow-up fa-3x text-primary mb-2"></i>
+                    <h6 class="fw-bold mb-1">Click to Upload Fridge Photo</h6>
+                    <p class="small text-muted mb-2">Supports JPG, PNG, WEBP (Max 16MB)</p>
+                    <input type="file" id="fridgeFileInput" class="d-none" accept="image/*" onchange="handleFileSelect(event)">
+                </div>
+
+                <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                    <span class="small text-muted fw-bold">OR TRY SAMPLE PHOTO:</span>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="runSampleFridgeScan()">
+                        <i class="fa-solid fa-image me-1"></i>Sample: Tomatoes & Paneer
+                    </button>
+                </div>
+
+                <!-- Preview Area -->
+                <div id="imagePreviewContainer" class="d-none mb-3 text-center">
+                    <img id="imagePreview" src="" class="img-fluid rounded-3 border shadow-sm" style="max-height: 200px;" alt="Fridge Preview">
+                </div>
+
+                <button class="btn btn-primary w-100 py-2 fw-bold mt-auto" id="analyzeBtn" onclick="analyzeFridgeImage()">
+                    <i class="fa-solid fa-brain me-2"></i>Analyze with Computer Vision AI
+                </button>
+            </div>
+        </div>
+
+        <!-- Vision AI Results & Cook vs Order Battle -->
+        <div class="col-lg-7">
+            <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100">
+                <div class="text-center my-auto py-5" id="fridgeEmptyState">
+                    <div class="empty-icon-circle mx-auto mb-3" style="width: 70px; height: 70px; background: #fff7ed; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-kitchen-set fa-2x text-warning"></i>
+                    </div>
+                    <h5 class="fw-bold">Ready for Vision Scan</h5>
+                    <p class="text-muted small">Upload a photo of your fridge ingredients or click 'Sample' to view the AI comparison.</p>
+                </div>
+
+                <!-- Results Container -->
+                <div id="fridgeResultContent" class="d-none">
+                    <!-- Detected Ingredients Badges -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"><i class="fa-solid fa-microchip text-primary me-2"></i>Detected Ingredients in Your Fridge:</h6>
+                        <div class="d-flex gap-2 flex-wrap" id="detectedBadges"></div>
+                    </div>
+
+                    <!-- Side-by-Side Cook vs Order Battle -->
+                    <div class="row g-3 align-items-stretch mb-4" id="battleCardsRow">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <!-- AI Verdict Banner -->
+                    <div class="alert alert-success border-0 rounded-3 mb-0" id="aiVerdictBox"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedFile = null;
+
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) {
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            document.getElementById('imagePreview').src = evt.target.result;
+            document.getElementById('imagePreviewContainer').classList.remove('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function runSampleFridgeScan() {
+    selectedFile = null;
+    document.getElementById('imagePreview').src = "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=400&q=80";
+    document.getElementById('imagePreviewContainer').classList.remove('d-none');
+    analyzeFridgeImage();
+}
+
+function analyzeFridgeImage() {
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Running OpenCV Vision Models...`;
+
+    const formData = new FormData();
+    if (selectedFile) {
+        formData.append('image', selectedFile);
+    } else {
+        formData.append('sample', 'default');
+    }
+
+    fetch('/api/fridge-vision', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            renderFridgeResults(data);
+        } else {
+            showToast("Failed to analyze image", "danger");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Error processing vision request", "danger");
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-brain me-2"></i>Analyze with Computer Vision AI`;
+    });
+}
+
+function renderFridgeResults(data) {
+    document.getElementById('fridgeEmptyState').classList.add('d-none');
+    const resultBox = document.getElementById('fridgeResultContent');
+    resultBox.classList.remove('d-none');
+
+    // 1. Ingredients
+    const badgesContainer = document.getElementById('detectedBadges');
+    badgesContainer.innerHTML = data.detected_ingredients.map(ing => `
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6">
+            <i class="fa-solid fa-check me-1"></i>${ing.name} <small class="text-muted">(${ing.confidence}% match)</small>
+        </span>
+    `).join('');
+
+    // 2. Battle Cards
+    const cmp = data.comparison;
+    const home = cmp.cook_at_home;
+    const deliv = cmp.order_delivery;
+    const battleRow = document.getElementById('battleCardsRow');
+
+    battleRow.innerHTML = `
+        <!-- Option A: Cook at Home -->
+        <div class="col-md-6">
+            <div class="card h-100 battle-card battle-card-home p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="fa-solid fa-fire me-1"></i>Cook at Home</span>
+                    <span class="badge bg-danger-subtle text-danger fw-bold">${home.effort_level}</span>
+                </div>
+                <h5 class="fw-bold mb-1">${cmp.dish_name}</h5>
+                <p class="small text-muted mb-3">Cook using fridge ingredients + shopping</p>
+
+                <ul class="list-unstyled small mb-3">
+                    <li class="mb-2"><i class="fa-solid fa-clock text-warning me-2"></i><strong>Prep & Cooking:</strong> ${home.prep_cook_time_min} mins</li>
+                    <li class="mb-2"><i class="fa-solid fa-sink text-danger me-2"></i><strong>Dishwashing / Cleaning:</strong> ${home.cleanup_time_min} mins (3 pans)</li>
+                    <li class="mb-2"><i class="fa-solid fa-basket-shopping text-secondary me-2"></i><strong>Missing Ingredients to Buy:</strong> ${home.missing_ingredients.join(', ')}</li>
+                    <li class="mb-2"><i class="fa-solid fa-wallet text-dark me-2"></i><strong>Grocery Cost:</strong> ₹${home.missing_cost_inr.toFixed(2)}</li>
+                </ul>
+
+                <div class="mt-auto border-top pt-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Total Time:</span>
+                        <span class="fw-bold text-dark">${home.total_time_min} minutes</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Total Cost:</span>
+                        <span class="fw-bold text-dark">₹${home.total_estimated_cost.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Option B: Order Delivery -->
+        <div class="col-md-6">
+            <div class="card h-100 battle-card battle-card-delivery p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge bg-success text-white fw-bold px-2 py-1"><i class="fa-solid fa-motorcycle me-1"></i>Order Delivery</span>
+                    <span class="badge bg-success-subtle text-success fw-bold">${deliv.effort_level}</span>
+                </div>
+                <h5 class="fw-bold mb-1">${cmp.dish_name}</h5>
+                <p class="small text-muted mb-3">Chef-crafted from Spice Villa</p>
+
+                <ul class="list-unstyled small mb-3">
+                    <li class="mb-2"><i class="fa-solid fa-kitchen-set text-success me-2"></i><strong>Kitchen Prep:</strong> ${deliv.kitchen_time_min} mins</li>
+                    <li class="mb-2"><i class="fa-solid fa-road text-primary me-2"></i><strong>Doorstep Transit:</strong> ${deliv.delivery_time_min} mins</li>
+                    <li class="mb-2"><i class="fa-solid fa-sparkles text-success me-2"></i><strong>Cleaning Effort:</strong> 0 mins (Eat & Recycle)</li>
+                    <li class="mb-2"><i class="fa-solid fa-award text-warning me-2"></i><strong>Quality:</strong> ${deliv.taste_consistency}</li>
+                </ul>
+
+                <div class="mt-auto border-top pt-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Total Time to Door:</span>
+                        <span class="fw-bold text-success">${deliv.total_time_min} minutes (Fast!)</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Delivered Price:</span>
+                        <span class="fw-bold fs-5 text-primary">₹${deliv.total_cost_inr.toFixed(2)}</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="addToCart(1, '${cmp.dish_name}', 160.0, 'Spice Villa', 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=400&q=80', true)">
+                        <i class="fa-solid fa-bolt me-1"></i>Order Delivery in 1-Click
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 3. Verdict
+    const verdictBox = document.getElementById('aiVerdictBox');
+    verdictBox.innerHTML = `
+        <h6 class="fw-bold mb-1 text-success"><i class="fa-solid fa-scale-balanced me-2"></i>AI Verdict & Recommendation:</h6>
+        <p class="mb-0 small text-dark">${cmp.verdict}</p>
+    `;
+}
+</script>
+{% endblock %}

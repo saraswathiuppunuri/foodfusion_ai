@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Live Delivery Route & Map — OpenStreetMap{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Header Banner -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #3b0764 0%, #1e1b4b 100%); color: white;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <span class="badge bg-purple text-white fw-bold mb-2 px-3 py-1 text-uppercase" style="background: #8b5cf6;">
+                    <i class="fa-solid fa-map-location-dot me-1"></i> Maps & Location Intelligence
+                </span>
+                <h2 class="fw-bold text-white mb-2">Live Delivery Route & Real-Time Kitchen Pins</h2>
+                <p class="text-purple-200 mb-0" style="color: #ddd6fe; max-width: 720px;">
+                    Powered by OpenStreetMap & Leaflet. Tracks live delivery routing, calculated ETAs, and nearby kitchen partners with zero external API key requirements.
+                </p>
+            </div>
+            <!-- ETA Pill Card -->
+            <div class="p-3 bg-white text-dark rounded-3 shadow-sm text-center">
+                <small class="text-muted fw-bold d-block text-uppercase">Rider Transit Status</small>
+                <div class="fs-4 fw-bold text-primary"><i class="fa-solid fa-motorcycle me-2"></i>8 Mins Away</div>
+                <small class="text-success fw-bold"><i class="fa-solid fa-signal me-1"></i>Live GPS Connected</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Interactive Leaflet Map -->
+        <div class="col-lg-8">
+            <div class="card border-0 rounded-4 shadow-sm p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-compass text-primary me-2"></i>Live Routing Radar</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-circle-dot me-1"></i>OpenStreetMap Tiles</span>
+                    </div>
+                </div>
+                <!-- Leaflet container -->
+                <div id="mapContainer" style="height: 520px; width: 100%; border-radius: 12px;"></div>
+            </div>
+        </div>
+
+        <!-- Sidebar Details: Restaurant Coordinates & Live Order -->
+        <div class="col-lg-4">
+            <div class="card border-0 rounded-4 shadow-sm p-4 bg-white mb-4">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-box text-primary me-2"></i>Active Delivery #104</h5>
+                
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <div class="small text-muted">Origin Kitchen:</div>
+                    <div class="fw-bold">Spice Villa (Indiranagar)</div>
+                    <div class="small text-muted mt-2">Delivery Destination:</div>
+                    <div class="fw-bold text-dark">Flat 402, Green Glen Layout</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Route Progress</span>
+                        <span class="fw-bold text-primary">68%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width: 68%;"></div>
+                    </div>
+                </div>
+
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><i class="fa-solid fa-road text-muted me-2"></i><strong>Remaining Distance:</strong> 1.4 km</li>
+                    <li class="mb-2"><i class="fa-solid fa-gauge-high text-muted me-2"></i><strong>Rider Speed:</strong> 24 km/h</li>
+                    <li class="mb-2"><i class="fa-solid fa-leaf text-success me-2"></i><strong>Eco-Route Pooling:</strong> Zero detour emissions</li>
+                </ul>
+            </div>
+
+            <!-- Restaurant Locations List -->
+            <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-store text-success me-2"></i>Nearby Kitchen Partners</h6>
+                <div class="d-flex flex-column gap-2" style="max-height: 240px; overflow-y: auto;">
+                    {% for r in restaurants %}
+                    <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold small">{{ r.name }}</div>
+                            <small class="text-muted">{{ r.cuisine }}</small>
+                        </div>
+                        <span class="badge bg-warning text-dark"><i class="fa-solid fa-star me-1"></i>{{ r.rating }}★</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Center around Indiranagar / Koramangala Bengaluru
+    const map = L.map('mapContainer').setView([12.9550, 77.6350], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Restaurant icons
+    const restaurantIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#4f46e5; color:white; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.3);'><i class='fa-solid fa-utensils'></i></div>",
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+    const homeIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#10b981; color:white; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.3);'><i class='fa-solid fa-house'></i></div>",
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+    const riderIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#ea580c; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(234,88,12,0.5); border: 2px solid white;'><i class='fa-solid fa-motorcycle'></i></div>",
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    // Kitchen Coordinates
+    const restaurantCoord = [12.9716, 77.6412]; // Spice Villa (Indiranagar)
+    const homeCoord = [12.9352, 77.6245];       // Customer Doorstep (Koramangala)
+
+    // Add Markers
+    L.marker(restaurantCoord, { icon: restaurantIcon })
+        .addTo(map)
+        .bindPopup("<b>Spice Villa</b><br>Origin Kitchen (Prep Finished)");
+
+    L.marker(homeCoord, { icon: homeIcon })
+        .addTo(map)
+        .bindPopup("<b>Your Delivery Doorstep</b><br>Flat 402");
+
+    // Route Polyline between restaurant and doorstep
+    const routePoints = [
+        [12.9716, 77.6412],
+        [12.9640, 77.6380],
+        [12.9550, 77.6350],
+        [12.9450, 77.6300],
+        [12.9352, 77.6245]
+    ];
+
+    const polyline = L.polyline(routePoints, {
+        color: '#4f46e5',
+        weight: 5,
+        opacity: 0.8,
+        dashArray: '8, 8'
+    }).addTo(map);
+
+    // Live Animated Rider Marker
+    let riderIndex = 1;
+    const riderMarker = L.marker(routePoints[riderIndex], { icon: riderIcon })
+        .addTo(map)
+        .bindPopup("<b>Rider Ramesh K.</b><br>Carrying your hot order! Speed: 24 km/h");
+
+    // Animate rider along route
+    setInterval(() => {
+        riderIndex = (riderIndex + 1) % routePoints.length;
+        riderMarker.setLatLng(routePoints[riderIndex]);
+    }, 3000);
+});
+</script>
+{% endblock %}
