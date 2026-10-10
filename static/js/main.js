@@ -592,34 +592,154 @@ function quickLoginRole(role, name, phone, address) {
     showToast(`Logged in as ${name} (${role.toUpperCase()})`, "success");
 }
 
-function handlePhoneLogin() {
-    const phoneInput = document.getElementById('loginPhoneInput');
-    const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+function switchAuthTab(tab) {
+    if (tab === 'login') {
+        const tabEl = document.getElementById('pills-login-tab');
+        if (tabEl) {
+            const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            bsTab.show();
+        }
+    } else if (tab === 'register') {
+        const tabEl = document.getElementById('pills-register-tab');
+        if (tabEl) {
+            const bsTab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            bsTab.show();
+        }
+    }
+}
 
-    if (!rawPhone || rawPhone.length < 10) {
-        showToast("Please enter a valid 10-digit mobile number", "warning");
+function handleUserRegister() {
+    const nameInput = document.getElementById('regName');
+    const emailInput = document.getElementById('regEmail');
+    const phoneInput = document.getElementById('regPhone');
+    const passwordInput = document.getElementById('regPassword');
+    const addressInput = document.getElementById('regAddress');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value.trim() : '';
+    const address = addressInput ? addressInput.value.trim() : '';
+
+    if (!name || !email || !password) {
+        showToast("Please enter Full Name, Email, and Password", "warning");
         return;
     }
 
-    const phone = '+91 ' + rawPhone.replace(/\\D/g, '').slice(-10);
-    const user = {
-        role: 'customer',
-        name: 'Aman Gupta',
-        phone: phone,
-        address: 'Flat 402, Green Glen Towers, Indiranagar'
-    };
-
-    localStorage.setItem('foodfusion_user', JSON.stringify(user));
-    renderUserNav(user);
-    populateCheckoutUser(user);
-
-    const loginModalEl = document.getElementById('loginModal');
-    if (loginModalEl) {
-        const bsModal = bootstrap.Modal.getInstance(loginModalEl);
-        if (bsModal) bsModal.hide();
+    if (!email.includes('@') || !email.includes('.')) {
+        showToast("Please enter a valid email address", "warning");
+        return;
     }
 
-    showToast(`Welcome! Logged in with ${phone}`, "success");
+    if (password.length < 4) {
+        showToast("Password must be at least 4 characters", "warning");
+        return;
+    }
+
+    const regBtn = document.getElementById('regSubmitBtn');
+    if (regBtn) {
+        regBtn.disabled = true;
+        regBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Creating Account...`;
+    }
+
+    fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: name,
+            email: email,
+            phone: phone ? ('+91 ' + phone.replace(/\D/g, '').slice(-10)) : '',
+            password: password,
+            address: address || 'Indiranagar, Bengaluru',
+            role: 'customer'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const user = data.user;
+            localStorage.setItem('foodfusion_user', JSON.stringify(user));
+            renderUserNav(user);
+            populateCheckoutUser(user);
+
+            const loginModalEl = document.getElementById('loginModal');
+            if (loginModalEl) {
+                const bsModal = bootstrap.Modal.getInstance(loginModalEl);
+                if (bsModal) bsModal.hide();
+            }
+
+            showToast(`🎉 Welcome ${user.name}! Your account has been created.`, "success");
+        } else {
+            showToast(data.message || "Registration failed", "danger");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Failed to connect to registration server", "danger");
+    })
+    .finally(() => {
+        if (regBtn) {
+            regBtn.disabled = false;
+            regBtn.innerHTML = `<i class="fa-solid fa-user-plus me-2"></i>Create Customer Account`;
+        }
+    });
+}
+
+function handleUserLogin() {
+    const identInput = document.getElementById('loginIdentifier');
+    const passInput = document.getElementById('loginPassword');
+
+    const identifier = identInput ? identInput.value.trim() : '';
+    const password = passInput ? passInput.value.trim() : '';
+
+    if (!identifier || !password) {
+        showToast("Please enter your Email/Phone and Password", "warning");
+        return;
+    }
+
+    const loginBtn = document.getElementById('loginSubmitBtn');
+    if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Logging in...`;
+    }
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            identifier: identifier,
+            password: password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const user = data.user;
+            localStorage.setItem('foodfusion_user', JSON.stringify(user));
+            renderUserNav(user);
+            populateCheckoutUser(user);
+
+            const loginModalEl = document.getElementById('loginModal');
+            if (loginModalEl) {
+                const bsModal = bootstrap.Modal.getInstance(loginModalEl);
+                if (bsModal) bsModal.hide();
+            }
+
+            showToast(`🎉 Welcome back, ${user.name}!`, "success");
+        } else {
+            showToast(data.message || "Invalid credentials", "danger");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast("Failed to connect to authentication server", "danger");
+    })
+    .finally(() => {
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>Log In`;
+        }
+    });
 }
 
 function logoutUser() {

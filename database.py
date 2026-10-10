@@ -193,6 +193,37 @@ class UserProfile(Base):
             "past_order_tags": self.past_order_tags
         }
 
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(150), unique=True, nullable=False)
+    phone = Column(String(30), nullable=True)
+    password_hash = Column(String(255), nullable=False)
+    address = Column(Text, nullable=True)
+    role = Column(String(30), default='customer')
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    def set_password(self, password):
+        import hashlib
+        self.password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+    def check_password(self, password):
+        import hashlib
+        return self.password_hash == hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "phone": self.phone or "",
+            "address": self.address or "",
+            "role": self.role or "customer",
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else ""
+        }
+
+
 # Database engine & session setup with automatic SQLite fallback
 engine = None
 SessionLocal = None
@@ -231,6 +262,30 @@ def init_db():
     eng = get_engine()
     Base.metadata.create_all(bind=eng)
     seed_initial_data()
+    ensure_default_user()
+
+def ensure_default_user():
+    eng = get_engine()
+    Base.metadata.create_all(bind=eng)
+    db = get_db()
+    try:
+        if db.query(User).count() == 0:
+            demo_user = User(
+                name="Aman Gupta",
+                email="aman@foodfusion.com",
+                phone="+91 98450 11223",
+                address="Flat 402, Green Glen Towers, Indiranagar, Bengaluru",
+                role="customer"
+            )
+            demo_user.set_password("password123")
+            db.add(demo_user)
+            db.commit()
+            print("[*] Default demo user created.")
+    except Exception as e:
+        print("[!] Error creating default user:", e)
+    finally:
+        db.close()
+
 
 def seed_initial_data():
     db = get_db()

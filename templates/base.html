@@ -521,58 +521,139 @@
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-                <div class="modal-header border-0 pb-0 pt-4 px-4">
-                    <div>
-                        <h4 class="fw-bold text-dark mb-1">Log in / Sign up</h4>
-                        <p class="text-muted small mb-0">Experience full ordering, address sync & role features</p>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header border-0 pb-0 pt-3 px-4">
+                    <!-- Clean Tab Switcher (Log In / Sign Up) -->
+                    <ul class="nav nav-pills nav-fill w-100 bg-light p-1 rounded-3" id="authTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold rounded-3 py-2 small" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab">
+                                <i class="fa-solid fa-right-to-bracket me-1"></i>Log In
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold rounded-3 py-2 small" id="pills-register-tab" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab">
+                                <i class="fa-solid fa-user-plus me-1"></i>Sign Up
+                            </button>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body p-4">
-                    <!-- Phone Input (Like Zomato) -->
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Phone Number</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white">+91</span>
-                            <input type="tel" class="form-control" id="loginPhoneInput" placeholder="Enter 10 digit mobile number" value="9845011223">
+                    <div class="tab-content" id="authTabsContent">
+                        
+                        <!-- ============================================== -->
+                        <!-- TAB 1: LOG IN FORM -->
+                        <!-- ============================================== -->
+                        <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
+                            <div class="mb-3 text-start">
+                                <label class="form-label small text-muted fw-bold mb-1">Email Address or Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa-solid fa-envelope text-muted"></i></span>
+                                    <input type="text" class="form-control" id="loginIdentifier" placeholder="e.g. aman@foodfusion.com or 9845011223" value="aman@foodfusion.com">
+                                </div>
+                            </div>
+
+                            <div class="mb-3 text-start">
+                                <label class="form-label small text-muted fw-bold mb-1">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa-solid fa-lock text-muted"></i></span>
+                                    <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" value="password123">
+                                </div>
+                            </div>
+
+                            <button class="btn btn-danger w-100 py-2 fw-bold rounded-3 mb-2 shadow-sm" id="loginSubmitBtn" onclick="handleUserLogin()">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Log In
+                            </button>
+
+                            <div class="text-center mb-3">
+                                <small class="text-muted">Don't have an account? <a href="javascript:void(0)" class="text-danger fw-bold text-decoration-none" onclick="switchAuthTab('register')">Sign up here</a></small>
+                            </div>
+
+                            <div class="position-relative text-center my-3">
+                                <hr class="text-muted my-2">
+                                <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted fw-semibold" style="font-size: 11px;">OR 1-CLICK QUICK DEMO</span>
+                            </div>
+
+                            <!-- 1-Click Role Switcher -->
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-light border text-start d-flex align-items-center gap-2 p-2 rounded-3" onclick="quickLoginRole('customer', 'Aman Gupta', '+91 98450 11223', 'Flat 402, Green Glen Towers, Indiranagar')">
+                                    <span class="badge bg-primary-subtle text-primary p-2 fs-6"><i class="fa-solid fa-user"></i></span>
+                                    <div>
+                                        <div class="fw-bold small text-dark">Aman Gupta (Customer)</div>
+                                        <small class="text-muted" style="font-size: 11px;">Indiranagar • Saved Address Active</small>
+                                    </div>
+                                </button>
+                                <button class="btn btn-light border text-start d-flex align-items-center gap-2 p-2 rounded-3" onclick="quickLoginRole('owner', 'Chef Sanjeev (Owner)', '+91 98450 44556', 'Spice Villa Kitchen, Indiranagar')">
+                                    <span class="badge bg-warning-subtle text-dark p-2 fs-6"><i class="fa-solid fa-store"></i></span>
+                                    <div>
+                                        <div class="fw-bold small text-dark">Spice Villa (Restaurant Owner)</div>
+                                        <small class="text-muted" style="font-size: 11px;">Manage kitchen orders & surplus</small>
+                                    </div>
+                                </button>
+                                <button class="btn btn-light border text-start d-flex align-items-center gap-2 p-2 rounded-3" onclick="quickLoginRole('rider', 'Rohan (Delivery Partner)', '+91 98450 77889', 'Bengaluru Central Hub')">
+                                    <span class="badge bg-success-subtle text-success p-2 fs-6"><i class="fa-solid fa-motorcycle"></i></span>
+                                    <div>
+                                        <div class="fw-bold small text-dark">Rohan Verma (Delivery Partner)</div>
+                                        <small class="text-muted" style="font-size: 11px;">Accept deliveries & live GPS</small>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <button class="btn btn-danger w-100 py-2 fw-bold rounded-3 mb-3" onclick="handlePhoneLogin()">
-                        Continue with OTP
-                    </button>
-
-                    <div class="position-relative text-center my-3">
-                        <hr class="text-muted">
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">OR 1-CLICK QUICK LOGIN</span>
-                    </div>
-
-                    <!-- 1-Click Role Switcher (Hackathon Ready) -->
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-light border text-start d-flex align-items-center gap-3 p-2 rounded-3" onclick="quickLoginRole('customer', 'Aman Gupta', '+91 98450 11223', 'Flat 402, Green Glen Towers, Indiranagar')">
-                            <span class="badge bg-primary-subtle text-primary p-2 fs-6"><i class="fa-solid fa-user"></i></span>
-                            <div>
-                                <div class="fw-bold small text-dark">Aman Gupta (Customer)</div>
-                                <small class="text-muted" style="font-size: 11px;">Indiranagar, Bengaluru • Saved Addresses Active</small>
+                        <!-- ============================================== -->
+                        <!-- TAB 2: REGISTER / SIGN UP FORM (NEW CUSTOMER) -->
+                        <!-- ============================================== -->
+                        <div class="tab-pane fade" id="pills-register" role="tabpanel">
+                            <div class="mb-2 text-start">
+                                <label class="form-label small text-muted fw-bold mb-1">Full Name *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa-solid fa-user text-muted"></i></span>
+                                    <input type="text" class="form-control form-control-sm" id="regName" placeholder="e.g. Rahul Sharma" required>
+                                </div>
                             </div>
-                        </button>
 
-                        <button class="btn btn-light border text-start d-flex align-items-center gap-3 p-2 rounded-3" onclick="quickLoginRole('owner', 'Chef Sanjeev (Owner)', '+91 98450 44556', 'Spice Villa Kitchen, Indiranagar')">
-                            <span class="badge bg-warning-subtle text-dark p-2 fs-6"><i class="fa-solid fa-store"></i></span>
-                            <div>
-                                <div class="fw-bold small text-dark">Spice Villa (Restaurant Owner)</div>
-                                <small class="text-muted" style="font-size: 11px;">Manage kitchen orders, menus & surplus food</small>
+                            <div class="mb-2 text-start">
+                                <label class="form-label small text-muted fw-bold mb-1">Email Address *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa-solid fa-envelope text-muted"></i></span>
+                                    <input type="email" class="form-control form-control-sm" id="regEmail" placeholder="e.g. rahul@example.com" required>
+                                </div>
                             </div>
-                        </button>
 
-                        <button class="btn btn-light border text-start d-flex align-items-center gap-3 p-2 rounded-3" onclick="quickLoginRole('rider', 'Rohan (Delivery Partner)', '+91 98450 77889', 'Bengaluru Central Hub')">
-                            <span class="badge bg-success-subtle text-success p-2 fs-6"><i class="fa-solid fa-motorcycle"></i></span>
-                            <div>
-                                <div class="fw-bold small text-dark">Rohan Verma (Delivery Partner)</div>
-                                <small class="text-muted" style="font-size: 11px;">Accept deliveries, live GPS & daily earnings</small>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6 text-start">
+                                    <label class="form-label small text-muted fw-bold mb-1">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white small px-2">+91</span>
+                                        <input type="tel" class="form-control form-control-sm" id="regPhone" placeholder="10-digit mobile">
+                                    </div>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <label class="form-label small text-muted fw-bold mb-1">Password *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-lock text-muted"></i></span>
+                                        <input type="password" class="form-control form-control-sm" id="regPassword" placeholder="Min 4 characters" required>
+                                    </div>
+                                </div>
                             </div>
-                        </button>
+
+                            <div class="mb-3 text-start">
+                                <label class="form-label small text-muted fw-bold mb-1">Delivery Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fa-solid fa-location-dot text-muted"></i></span>
+                                    <input type="text" class="form-control form-control-sm" id="regAddress" placeholder="Flat / House / Floor, Street / Area, Bengaluru">
+                                </div>
+                            </div>
+
+                            <button class="btn btn-danger w-100 py-2 fw-bold rounded-3 mb-2 shadow-sm" id="regSubmitBtn" onclick="handleUserRegister()">
+                                <i class="fa-solid fa-user-plus me-2"></i>Create Customer Account
+                            </button>
+
+                            <div class="text-center">
+                                <small class="text-muted">Already have an account? <a href="javascript:void(0)" class="text-danger fw-bold text-decoration-none" onclick="switchAuthTab('login')">Log in</a></small>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

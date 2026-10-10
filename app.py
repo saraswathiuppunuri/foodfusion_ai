@@ -6,7 +6,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from config import Config
-from database import init_db, get_db, Restaurant, Dish, SurplusDeal, Order, OrderItem, UserProfile
+from database import init_db, get_db, Restaurant, Dish, SurplusDeal, Order, OrderItem, UserProfile, User
 from ai_engine.nl_parser import build_smart_cart
 from ai_engine.group_optimizer import optimize_group_order
 from ai_engine.recommender import train_and_recommend
@@ -105,6 +105,95 @@ def get_restaurants():
     finally:
         db.close()
     return jsonify({"status": "success", "restaurants": restaurants})
+
+# -------------------------------------------------------------
+# AUTHENTICATION APIS (Customer Registration & Login)
+# -------------------------------------------------------------
+@app.route('/api/auth/register', methods=['POST'])
+def register_user():
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip().lower()
+    phone = data.get('phone', '').strip()
+    password = data.get('password', '').strip()
+    address = data.get('address', '').strip()
+    role = data.get('role', 'customer').strip()
+
+    if not name or not email or not password:
+        return jsonify({"status": "error", "message": "Name, Email, and Password are required."}), 400
+
+    if len(password) < 4:
+        return jsonify({"status": "error", "message": "Password must be at least 4 characters."}), 400
+
+    db = get_db()
+    try:
+        # Check if email is already taken
+        existing_user = db.query(User).filter_by(email=email).first()
+        if existing_user:
+            return jsonify({"status": "error", "message": f"An account with email '{email}' already exists. Please log in."}), 400
+
+        # Check phone if given
+        if phone:
+            existing_phone = db.query(User).filter_by(phone=phone).first()
+            if existing_phone:
+                return jsonify({"status": "error", "message": f"An account with phone '{phone}' already exists."}), 400
+
+        user = User(
+            name=name,
+            email=email,
+            phone=phone,
+            address=address,
+            role=role
+        )
+        user.set_password(password)
+        db.add(user)
+        db.commit()
+
+        # Link/create user profile for recommendation engine
+        existing_profile = db.query(UserProfile).filter_by(username=name).first()
+        if not existing_profile:
+            new_profile = UserProfile(username=name)
+            db.add(new_profile)
+            db.commit()
+
+        user_dict = user.to_dict()
+    finally:
+        db.close()
+
+    return jsonify({
+        "status": "success",
+        "message": f"Welcome, {name}! Your account has been registered successfully.",
+        "user": user_dict
+    })
+
+@app.route('/api/auth/login', methods=['POST'])
+def login_user():
+    data = request.get_json() or {}
+    identifier = data.get('identifier', '').strip()
+    password = data.get('password', '').strip()
+
+    if not identifier or not password:
+        return jsonify({"status": "error", "message": "Please enter your Email or Phone and Password."}), 400
+
+    db = get_db()
+    try:
+        # Search by email or phone
+        user = db.query(User).filter(
+            (User.email == identifier.lower()) | (User.phone == identifier)
+        ).first()
+
+        if not user or not user.check_password(password):
+            return jsonify({"status": "error", "message": "Invalid email/phone or password. Please try again."}), 401
+
+        user_dict = user.to_dict()
+    finally:
+        db.close()
+
+    return jsonify({
+        "status": "success",
+        "message": f"Welcome back, {user_dict['name']}!",
+        "user": user_dict
+    })
 
 # Feature 1: Natural Language Ordering API
 @app.route('/api/nl-order', methods=['POST'])
