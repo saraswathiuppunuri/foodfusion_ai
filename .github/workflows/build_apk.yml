@@ -27,9 +27,11 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Ensure Android platform files and Gradle wrapper
+      - name: Regenerate clean Android platform files
         working-directory: foodfusion_ai/mobile
-        run: flutter create . --platforms=android --org com.foodfusion.ai
+        run: |
+          rm -rf android
+          flutter create . --platforms=android --org com.foodfusion.ai --project-name foodfusion_ai
 
       - name: Install Dependencies
         working-directory: foodfusion_ai/mobile
