@@ -7,7 +7,7 @@ def run_tests():
     client = app.test_client()
 
     print("[*] Testing Web Template Pages...")
-    routes = ['/', '/surplus', '/group', '/fridge', '/analytics', '/map']
+    routes = ['/', '/surplus', '/group', '/fridge', '/map']
     for route in routes:
         res = client.get(route)
         if res.status_code != 200:
@@ -50,12 +50,10 @@ def run_tests():
     print(f"  [OK] Top Pick: {recs[0]['name']} ({recs[0]['match_score']}% Match)")
     print(f"  [OK] Reasoning: {recs[0]['explanation']}")
 
-    print("\n[*] Testing Feature 5: Predictive Kitchen & Waste Analytics...")
-    ana_res = client.get('/api/analytics')
-    assert ana_res.status_code == 200
-    ana_data = ana_res.get_json()['data']
-    print(f"  [OK] Total Waste Rescued: {ana_data['total_waste_saved_kg']} kg")
-    print(f"  [OK] Revenue Recovered: ₹{ana_data['total_revenue_recovered_inr']}")
+    print("\n[*] Testing Customer Authentication (Login & Register)...")
+    auth_res = client.post('/api/auth/login', json={'identifier': 'aman@foodfusion.com', 'password': 'password123'})
+    assert auth_res.status_code == 200
+    print(f"  [OK] Customer Authentication Validated: {auth_res.get_json()['user']['name']}")
 
     print("\n[*] Testing Unique Twist: Fridge Vision & Cook vs. Order Comparison...")
     fv_res = client.post('/api/fridge-vision', json={'sample': 'default'})

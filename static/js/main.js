@@ -129,36 +129,6 @@ function updateCartUI() {
 
     if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
     if (grandTotalEl) grandTotalEl.textContent = `₹${grandTotal.toFixed(2)}`;
-
-    // Query predictive order timing
-    fetchOrderPrediction(cart.length);
-}
-
-function fetchOrderPrediction(itemCount) {
-    fetch('/api/predict-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_count: itemCount, distance_km: 3.2 })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const p = data.prediction;
-            const etaEl = document.getElementById('cartEtaDisplay');
-            const delayEl = document.getElementById('cartDelayStatus');
-            if (etaEl) etaEl.innerHTML = `<i class="fa-solid fa-clock text-primary me-1"></i>~${p.total_eta_min} mins (${p.predicted_prep_min}m prep + ${p.predicted_delivery_min}m transit)`;
-            if (delayEl) {
-                if (p.is_delayed) {
-                    delayEl.className = "badge bg-warning-subtle text-warning-emphasis";
-                    delayEl.textContent = "Delay Risk Flagged";
-                } else {
-                    delayEl.className = "badge bg-success-subtle text-success";
-                    delayEl.textContent = "On Time Guarantee";
-                }
-            }
-        }
-    })
-    .catch(err => console.error(err));
 }
 
 function handleCheckout() {
@@ -555,7 +525,7 @@ function renderUserNav(user) {
                     <small class="text-muted text-capitalize">${user.role || 'Customer'} • ${user.phone || ''}</small>
                 </li>
                 <li><a class="dropdown-item rounded-2 py-2 small" href="#checkoutModal" onclick="openCheckoutModal()"><i class="fa-solid fa-bag-shopping me-2 text-danger"></i>My Cart & Checkout</a></li>
-                <li><a class="dropdown-item rounded-2 py-2 small" href="/analytics"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Orders & Analytics</a></li>
+                <li><a class="dropdown-item rounded-2 py-2 small" href="/map"><i class="fa-solid fa-map-location-dot me-2 text-danger"></i>Live Track on Map</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><button class="dropdown-item rounded-2 py-2 small text-danger" onclick="logoutUser()"><i class="fa-solid fa-right-from-bracket me-2"></i>Log out</button></li>
             </ul>

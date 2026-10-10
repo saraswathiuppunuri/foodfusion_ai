@@ -18,7 +18,13 @@ class Config:
     
     # Priority: explicit DATABASE_URL -> constructed MySQL URL -> SQLite fallback
     DEFAULT_MYSQL = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', DEFAULT_MYSQL)
+    
+    # Handle cloud providers (Render, Heroku) where PostgreSQL URLs start with postgres://
+    raw_db_url = os.environ.get('DATABASE_URL')
+    if raw_db_url and raw_db_url.startswith('postgres://'):
+        raw_db_url = raw_db_url.replace('postgres://', 'postgresql://', 1)
+        
+    SQLALCHEMY_DATABASE_URI = raw_db_url or DEFAULT_MYSQL
     
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max upload

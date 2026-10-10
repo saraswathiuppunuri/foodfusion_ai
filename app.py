@@ -10,7 +10,6 @@ from database import init_db, get_db, Restaurant, Dish, SurplusDeal, Order, Orde
 from ai_engine.nl_parser import build_smart_cart
 from ai_engine.group_optimizer import optimize_group_order
 from ai_engine.recommender import train_and_recommend
-from ai_engine.predictive_kitchen import predict_order_timings, generate_analytics_data
 from ai_engine.vision_fridge import analyze_fridge_image
 
 app = Flask(__name__)
@@ -71,10 +70,6 @@ def group_order():
 @app.route('/fridge')
 def fridge_vision():
     return render_template('fridge.html')
-
-@app.route('/analytics')
-def analytics_dashboard():
-    return render_template('analytics.html')
 
 @app.route('/map')
 def map_view():
@@ -333,23 +328,6 @@ def get_recommendations():
         "recommendations": recommendations
     })
 
-# Feature 5: Predictive Kitchen & Analytics APIs
-@app.route('/api/predict-order', methods=['POST'])
-def predict_order():
-    data = request.get_json() or {}
-    item_count = int(data.get('item_count', 2))
-    distance_km = float(data.get('distance_km', 3.5))
-    queue = int(data.get('kitchen_queue', 4))
-    is_peak = bool(data.get('is_peak_hour', False))
-
-    timings = predict_order_timings(item_count, distance_km, queue, is_peak)
-    return jsonify({"status": "success", "prediction": timings})
-
-@app.route('/api/analytics', methods=['GET'])
-def get_analytics():
-    data = generate_analytics_data()
-    return jsonify({"status": "success", "data": data})
-
 # Unique Twist: Fridge-to-Plate Vision AI API
 @app.route('/api/fridge-vision', methods=['POST'])
 def process_fridge_vision():
@@ -426,9 +404,6 @@ def place_order():
     if delivery_instructions:
         full_address = f"{address} • Note: {delivery_instructions}"
 
-    # Predict timing
-    prediction = predict_order_timings(item_count=len(items), distance_km=3.2)
-
     db = get_db()
     try:
         new_order = Order(
@@ -438,10 +413,10 @@ def place_order():
             total_amount=round(final_total, 2),
             order_type=order_type,
             status="preparing",
-            predicted_prep_min=prediction["predicted_prep_min"],
-            predicted_delivery_min=prediction["predicted_delivery_min"],
-            delay_flag=prediction["is_delayed"],
-            delay_reason=prediction["delay_reason"]
+            predicted_prep_min=18,
+            predicted_delivery_min=12,
+            delay_flag=False,
+            delay_reason=None
         )
         db.add(new_order)
         db.commit()

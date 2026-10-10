@@ -233,17 +233,20 @@ def get_engine():
     if engine is not None:
         return engine
 
-    # First attempt MySQL if specified or default
-    mysql_uri = Config.SQLALCHEMY_DATABASE_URI or Config.DEFAULT_MYSQL
+    db_uri = Config.SQLALCHEMY_DATABASE_URI or Config.DEFAULT_MYSQL
+    if db_uri.startswith('sqlite'):
+        engine = create_engine(db_uri, connect_args={"check_same_thread": False})
+        return engine
+
     try:
-        test_engine = create_engine(mysql_uri, pool_pre_ping=True, pool_recycle=3600)
+        test_engine = create_engine(db_uri, pool_pre_ping=True, pool_recycle=3600)
         with test_engine.connect() as conn:
             pass
-        print(f"[*] Connected successfully to MySQL database.")
+        print(f"[*] Connected successfully to database: {test_engine.url.drivername}")
         engine = test_engine
         return engine
     except Exception as e:
-        print(f"[!] MySQL connection failed ({e}). Falling back to local SQLite database (hackathon.db)...")
+        print(f"[!] Primary database connection failed ({e}). Falling back to local SQLite database (hackathon.db)...")
         sqlite_path = os.path.join(Config.BASE_DIR, 'hackathon.db')
         engine = create_engine(f"sqlite:///{sqlite_path}", connect_args={"check_same_thread": False})
         return engine
